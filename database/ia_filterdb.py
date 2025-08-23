@@ -221,7 +221,7 @@ async def get_search_results(
 
 
 async def get_bad_files(query, file_type=None):
-query = query.strip()
+    query = query.strip()
     if not query:
         raw_pattern = '.'
     elif ' ' not in query:
