@@ -13,6 +13,7 @@ from info import *
 from utils import get_settings, save_group_settings
 from datetime import datetime, timedelta
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -252,12 +253,18 @@ async def get_bad_files(query, file_type=None):
 
 async def get_file_details(query):
     filter = {"file_id": query}
-    cursor = Media.find(filter)
-    filedetails = await cursor.to_list(length=1)
-    if not filedetails:
-        cursor2 = Media2.find(filter)
-        filedetails = await cursor2.to_list(length=1)
-    return filedetails
+    
+    tasks = [Media.find(filter).to_list(length=1)]
+    if MULTIPLE_DB:
+        tasks.append(Media2.find(filter).to_list(length=1))
+        
+    results = await asyncio.gather(*tasks)
+    
+    for filedetails in results:
+        if filedetails:
+            return filedetails
+            
+    return []
 
 
 def encode_file_id(s: bytes) -> str:
