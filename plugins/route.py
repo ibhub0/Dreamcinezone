@@ -69,7 +69,6 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
-# (The rest of your media_streamer function remains the same)
 class_cache = {}
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
