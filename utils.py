@@ -81,19 +81,29 @@ async def is_req_subscribed(bot, user_id, rqfsub_channels):
 
 async def is_subscribed(bot, user_id, fsub_channels):
     btn = []
-    for channel_id in fsub_channels:
+    
+    async def check_channel(channel_id):
         try:
-            chat = await bot.get_chat(int(channel_id))
+            # No need to get chat object separately
             await bot.get_chat_member(channel_id, user_id)
         except UserNotParticipant:
             try:
-                invite = await bot.create_chat_invite_link(channel_id, creates_join_request=False)
-                btn.append([InlineKeyboardButton(f"📢 Join {chat.title}", url=invite.invite_link)])
+                chat = await bot.get_chat(int(channel_id))
+                invite_link = await bot.create_chat_invite_link(channel_id)
+                return InlineKeyboardButton(f"📢 Join {chat.title}", url=invite_link.invite_link)
             except Exception as e:
                 logger.warning(f"Failed to create invite for {channel_id}: {e}")
         except Exception as e:
             logger.exception(f"is_subscribed error for {channel_id}: {e}")
-            pass
+        return None
+
+    tasks = [check_channel(channel_id) for channel_id in fsub_channels]
+    results = await asyncio.gather(*tasks)
+
+    for button in results:
+        if button:
+            btn.append([button])
+            
     return btn
 
 async def is_check_admin(bot, chat_id, user_id):
@@ -828,4 +838,3 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
     except Exception as e:
         logging.error(f"Error in get_cap: {e}")
         pass
-       
