@@ -15,6 +15,8 @@ from bs4 import BeautifulSoup
 import requests
 from shortzy import Shortzy
 
+from plugins.Dreamxfutures.Imdbposter import get_movie_detailsx
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -205,8 +207,6 @@ async def add_name_to_db(filename):
 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
-        if ULTRA_FAST_MODE:
-            return None
         query = (query.strip()).lower()
         title = query
         year = re.findall(r'[1-2]\d{3}$', query, re.IGNORECASE)
@@ -283,6 +283,69 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'plot': plot,
         'rating': str(movie.get("rating")),
         'url':f'https://www.imdb.com/title/tt{movieid}'
+    }
+    
+async def get_posterx(query, bulk=False, id=False, file=None):
+    """
+    Fetches movie details from TMDB using the get_movie_detailsx helper
+    and formats the output to be compatible with the original get_poster function.
+    """
+    if not id:
+        # The get_movie_detailsx function handles searching by query string.
+        details = await get_movie_detailsx(query, file=file)
+    else:
+        # Assumes the 'id' is a TMDB ID or IMDb ID that get_movie_detailsx can handle.
+        details = await get_movie_detailsx(query, id=True)
+
+    if not details or details.get("error"):
+        return None
+    
+    plot = ""
+    if not LONG_IMDB_DESCRIPTION:
+        plot = details.get('plot')
+        if plot and len(plot) > 0:
+            plot = plot[0]
+    else:
+        plot = details.get('plot outline')
+    if plot and len(plot) > 800:
+        plot = plot[0:800] + "..."
+
+    # --- Mapping TMDB keys to the original IMDb key format ---
+
+    def list_to_str(val):
+        if isinstance(val, list):
+            return ", ".join(str(x) for x in val if x)
+        return str(val) if val else ""
+
+    return {
+        'title': details.get('title'),
+        'votes': details.get('votes'),
+        "aka": None,  # Not typically provided by TMDB in this format
+        "seasons": details.get('seasons'),
+        "box_office": details.get('box_office'),
+        'localized_title': details.get('localized_title'),
+        'kind': 'movie' if 'movie' in details.get('tmdb_url', '') else 'tv series',
+        "imdb_id": details.get('imdb_id'),
+        "cast": list_to_str(details.get("cast")),
+        "runtime": list_to_str(details.get("runtime")),
+        "countries": list_to_str(details.get("countries")),
+        "certificates": list_to_str(details.get("certificates")),
+        "languages": list_to_str(details.get("languages")),
+        "director": list_to_str(details.get("director")),
+        "writer": list_to_str(details.get("writer")),
+        "producer": list_to_str(details.get("producer")),
+        "composer": list_to_str(details.get("composer")),
+        "cinematographer": list_to_str(details.get("cinematographer")),
+        "music_team": None, # Not provided by the TMDB API wrapper
+        "distributors": list_to_str(details.get("distributors")),
+        'release_date': details.get('release_date'),
+        'year': details.get('year'),
+        'genres': list_to_str(details.get("genres")),
+        'poster': details.get('poster_url'),
+        'backdrop' : details.get('backdrop_url'),
+        'plot': plot,
+        'rating': str(details.get("rating", "N/A")),
+        'url': details.get('tmdb_url')
     }
     
 async def search_gagala(text):
@@ -757,7 +820,7 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
                             f"</a></b>"
                         )
             else:
-                imdb = await get_poster(search, file=(files[0]).file_name) if settings["imdb"] else None
+                imdb = await get_posterx(search, file=(files[0]).file_name) if settings["imdb"] else None
                 if imdb:
                     TEMPLATE = script.IMDB_TEMPLATE_TXT
                     cap = TEMPLATE.format(
