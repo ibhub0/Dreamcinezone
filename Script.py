@@ -250,20 +250,18 @@ Mᴇꜱꜱᴀɢᴇ : <b>{}</b>"""
 🔍 <b>Sᴇᴀʀᴄʜ →</b> {search_link}
 """
 
-    X_IMDB_TEMPLATE_TXT = """
-<b>
-🔖 ᴛɪᴛʟᴇ : <a href={url}>{title}</a>
-🎭 ɢᴇɴʀᴇ : {genres}
-📆 ʀᴇʟᴇᴀsᴇ : <a href={url}/releaseinfo>{year}</a>
-🌟 ʀᴀᴛɪɴɢ : <a href={url}/ratings>{rating}</a> / 10
-🎙️ ʟᴀɴɢᴜᴀɢᴇ : {languages}
-
-Result Shown in: {remaining_seconds} <i>sec</i> 🔥
-<b>Requested by : {message.from_user.mention}</b>
-
-★ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <b><a href="https://t.me/filmztube">Filmztube ⎚</a></b></b>"""
-
     IMDB_TEMPLATE_TXT = """
+<b><a href={url}>{title} (<a href={url}/releaseinfo>{year})</a>
+🌟 ʀᴀᴛɪɴɢ : <a href={url}/ratings>{rating}</a>
+🎭 ɢᴇɴʀᴇ : {genres}
+🎧 ᴀᴜᴅɪᴏ : {languages}
+
+<blockquote>sʜᴏᴡɴ ɪɴ : {remaining_seconds} <i>sᴇᴄ</i>⚡️</blockquote>
+<b>ʀᴇǫ ʙʏ : {message.from_user.mention}</b>
+
+🍁 ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <b><a href="https://t.me/filmztube">ꜰɪʟᴍᴢᴛᴜʙᴇ</a></b></b>"""
+
+    X_IMDB_TEMPLATE_TXT = """
 <b>
 🔖 : <a href={url}>{title}</a>
 🎭 : {genres}
@@ -274,7 +272,7 @@ Result Shown in: {remaining_seconds} <i>sec</i> 🔥
 Shown in: {remaining_seconds} <i>sec</i> 🔥
 <b>Req by : {message.from_user.mention}</b>
 
-★ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <b><a href="https://t.me/filmztube">Filmztube ⎚</a></b></b>"""
+★ ᴊᴏɪɴ : <b><a href="https://t.me/filmztube">Filmztube ⎚</a></b></b>"""
 
     LOGO = r"""
     ██████╗░██████╗░███████╗░█████╗░███╗░░░███╗██╗░░██╗██████╗░░█████╗░████████╗███████╗
