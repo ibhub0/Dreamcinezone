@@ -1177,9 +1177,17 @@
             const sizeSlider = document.getElementById('size-slider');
             const mainContainer = document.querySelector('.main-container');
 
+            // Check if the viewport matches the mobile media query (<= 768px)
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                // On mobile, set the slider's value to its maximum
+                sizeSlider.value = sizeSlider.max;
+            }
+
+            // Get the initial width from the slider's value (either default 70 or max 95 for mobile)
             const defaultWidth = sizeSlider.value;
             mainContainer.style.maxWidth = defaultWidth >= 95 ? '1400px' : `${defaultWidth}vw`;
 
+            // Add the event listener to handle changes
             sizeSlider.addEventListener('input', (e) => {
                 const newWidth = e.target.value;
                 mainContainer.style.maxWidth = newWidth >= 95 ? '1400px' : `${newWidth}vw`;
