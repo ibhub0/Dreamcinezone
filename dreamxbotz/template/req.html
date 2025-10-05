@@ -799,6 +799,10 @@
                                         <img src="https://i.postimg.cc/rFT43LNh/hd.png" alt="HD Player">
                                         <span>HD Player</span>
                                     </a>
+                                    <a href="#" class="player-btn" onclick="mx_playerpro()">
+                                        <img src="https://i.postimg.cc/sx4Msv4T/mx.png" alt="MX Player pro">
+                                        <span>MX Player Pro</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -1246,11 +1250,8 @@
 
         // Credit for this JavaScript goes to @bharath_boy || please do not remove.
         function vlc_player() { window.location.href = `vlc://${e}`; event.preventDefault(); }
-        //function mx_player() { window.location.href = `intent:${e}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;end`; event.preventDefault(); }
-        function mx_player() {
-            window.location.href = `intent:${e}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.pro;end`;
-            event.preventDefault();
-        }
+        function mx_player() { window.location.href = `intent:${e}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;end`; event.preventDefault(); }
+        function mx_playerpro() { window.location.href = `intent:${e}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.pro;end`; event.preventDefault(); }
         function playit_player() { window.location.href = `playit://playerv2/video?url=${e}`; event.preventDefault(); }
         function km_player() { window.location.href = `intent:${e}#Intent;package=com.kmplayer;end`; event.preventDefault(); }
         function s_player() { window.location.href = `intent:${e}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`; event.preventDefault(); }
