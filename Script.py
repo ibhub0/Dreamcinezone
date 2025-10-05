@@ -252,14 +252,15 @@ Mᴇꜱꜱᴀɢᴇ : <b>{}</b>"""
 
     IMDB_TEMPLATE_TXT = """
 <b><a href={url}>{title} (<a href={url}/releaseinfo>{year})</a>
-🌟 ʀᴀᴛɪɴɢ : <a href={url}/ratings>{rating}</a>
-🎭 ɢᴇɴʀᴇ : {genres}
-🎧 ᴀᴜᴅɪᴏ : {languages}
 
-<blockquote>sʜᴏᴡɴ ɪɴ : {remaining_seconds} <i>sᴇᴄ</i>⚡️</blockquote>
+ʀᴀᴛɪɴɢ : <a href={url}/ratings>{rating}</a>
+ɢᴇɴʀᴇ : {genres}
+ᴀᴜᴅɪᴏ : {languages}
+
+sʜᴏᴡɴ ɪɴ : {remaining_seconds} <i>sᴇᴄ</i>⚡️
 <b>ʀᴇǫ ʙʏ : {message.from_user.mention}</b>
 
-🍁 ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <b><a href="https://t.me/filmztube">ꜰɪʟᴍᴢᴛᴜʙᴇ</a></b></b>"""
+ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <b><a href="https://t.me/filmztube">ꜰɪʟᴍᴢᴛᴜʙᴇ</a></b></b>"""
 
     X_IMDB_TEMPLATE_TXT = """
 <b>

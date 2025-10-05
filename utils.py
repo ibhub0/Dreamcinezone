@@ -809,7 +809,7 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
             IMDB_CAP = temp.IMDB_CAP.get(query.from_user.id)
             if IMDB_CAP:
                 cap = IMDB_CAP
-                cap += "\n\n🧾 <u>Your Requested Files Are Here</u> 👇\n\n</b>"
+                cap += "\n\n<u>Your Requested Files Are Here</u>\n\n</b>"
                 for idx, file in enumerate(files, start=offset + 1):
                         cap += (
                             f"<b>{idx}. "
@@ -879,7 +879,7 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
                             f"📝 ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ : {query.from_user.mention}\n"
                             f"⚜️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ :⚡ {query.message.chat.title}\n</b>"
                         )
-                    cap += "\n\n🧾 <u>Your Requested Files Are Here</u> 👇 👇\n\n</b>"
+                    cap += "\n\n<u>Your Requested Files Are Here</u> \n\n</b>"
                     for idx, file in enumerate(files, start=offset + 1):
                         cap += (
                             f"<b>{idx}. "
@@ -905,7 +905,7 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
                     f"⚜️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : ⚡ {query.message.chat.title or temp.B_LINK or 'ᴅʀᴇᴀᴍxʙᴏᴛᴢ'}\n</b>"
                 )
 
-            cap += "\n\n🧾 <u>Your Requested Files Are Here</u> 👇\n\n</b>"
+            cap += "\n\n<u>Your Requested Files Are Here</u>\n\n</b>"
             for idx, file in enumerate(files, start=offset):
                         cap += (
                             f"<b>{idx}. "
