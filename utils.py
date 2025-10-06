@@ -805,7 +805,7 @@ def clean_search_text(search_raw: str) -> str:
 
 async def get_cap(settings, remaining_seconds, files, query, total_results, search, offset=0):
     try:
-        if settings["imdb"] and not ULTRA_FAST_MODE:
+        if settings["imdb"]:
             IMDB_CAP = temp.IMDB_CAP.get(query.from_user.id)
             if IMDB_CAP:
                 cap = IMDB_CAP
@@ -854,6 +854,7 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
                         url=imdb['url'],
                         **locals()
                     )
+                    
                     for idx, file in enumerate(files, start=offset+1):
                         cap += (
                             f"<b>{idx}. "
