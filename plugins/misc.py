@@ -1,7 +1,7 @@
 import os
 from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant, MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
-from info import LANDSCAPE_POSTER
+from info import LANDSCAPE_POSTER, TMDB_ON_SEARCH
 from utils import extract_user, get_file_id, get_poster, get_posterx
 from datetime import datetime
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
@@ -132,7 +132,7 @@ async def imdb_search(client, message):
     if ' ' in message.text:
         k = await message.reply('Searching ImDB')
         r, title = message.text.split(None, 1)
-        movies = await get_posterx(title, bulk=True)
+        movies = await get_posterx(title, bulk=True) if TMDB_ON_SEARCH else await get_poster(title, bulk=True)
         if not movies:
             return await message.reply("No results Found")
         btn = [
@@ -151,7 +151,7 @@ async def imdb_search(client, message):
 @Client.on_callback_query(filters.regex('^imdb'))
 async def imdb_callback(bot: Client, quer_y: CallbackQuery):
     i, movie = quer_y.data.split('#')
-    imdb = await get_posterx(query=movie, id=True)
+    imdb = await get_posterx(query=movie, id=True) if TMDB_ON_SEARCH else await get_poster(query=movie, id=True)
     btn = [
             [
                 InlineKeyboardButton(

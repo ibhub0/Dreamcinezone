@@ -350,7 +350,7 @@ async def advantage_spoll_choker(bot, query):
     _, id, user = query.data.split('#')
     if int(user) != 0 and query.from_user.id != int(user):
         return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
-    movies = await get_posterx(id, id=True)
+    movies = await get_posterx(id, id=True) if TMDB_ON_SEARCH else await get_poster(id, id=True)
     movie = movies.get('title')
     movie = re.sub(r"[:-]", " ", movie)
     movie = re.sub(r"\s+", " ", movie).strip()
@@ -1939,7 +1939,7 @@ async def auto_filter(client, msg, spoll=False):
 
         poster_start = perf_counter()
         if settings['imdb']:
-                imdb = await get_posterx(search, file=(files[0]).file_name) if settings.get("imdb") else None
+                imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_ON_SEARCH else await get_poster(search, file=(files[0]).file_name)
         else:
             imdb = None
         timings["get_poster"] += perf_counter() - poster_start
