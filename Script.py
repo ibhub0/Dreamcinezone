@@ -1,18 +1,17 @@
 class script(object):
-    START_TXT =  """<b>Hᴇʟʟᴏ {} 😃,{} 
-    
-ɪ ᴀᴍ  <a href=https://t.me/{}>{}</a>, I Cᴀɴ Pʀᴏᴠɪᴅᴇ Mᴏᴠɪᴇs, Jᴜsᴛ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ᴏʀ Sᴇᴀʀᴄʜ Pᴍ Aɴᴅ Eɴᴊᴏʏ 😍.
+    START_TXT = """<b><u>🚩 ᴊᴀɪ ꜱʜʀɪ ʀᴀᴍ 🚩</u></b>
 
- 
-★ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <a href='https://t.me/filmztube'>𝗙𝗶𝗹𝗺𝘇𝘁𝘂𝗯𝗲 ⎚</a></b>"""
+<b>ʜᴇʏ {}, {}</b>
+
+<b>🤖 ɪ ᴀᴍ <a href=https://t.me/{}>{}</a>, ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ.</b>
+"""
 
 
-    GSTART_TXT = """<b>Hᴇʟʟᴏ {} 😃,ɪ ᴀᴍ : <a href=https://t.me/{}>{}</a>.
- 
-I Cᴀɴ Pʀᴏᴠɪᴅᴇ Mᴏᴠɪᴇs, Jᴜsᴛ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ ᴏʀ Sᴇᴀʀᴄʜ Pᴍ Aɴᴅ Eɴᴊᴏʏ 😍.
+    GSTART_TXT = """<b>🚩 ᴊᴀɪ ꜱʜʀɪ ʀᴀᴍ 🚩</b>
 
- 
-★ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <a href='https://t.me/filmztube'>𝗙𝗶𝗹𝗺𝘇𝘁𝘂𝗯𝗲 ⎚</a></b>"""
+<b>ʜᴇʏ {},</b>
+
+<b>🤖 ɪ ᴀᴍ <a href=https://t.me/{}>{}</a>, ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ.</b>"""
 
     
     HELP_TXT = """<b>
@@ -141,11 +140,6 @@ Nᴀᴍᴇ - {}
 
 <blockquote>👇 नीचे दिए गए विकल्पों में से movie के नाम की सही spelling चुनें</blockquote>"""
 
-    DEL_MSG = """⚠️ ᴛʜɪꜱ ᴍᴏᴠɪᴇ ꜰɪʟᴇ/ᴠɪᴅᴇᴏ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ɪɴ <b><u><code>{}</code></u></b>
-
-<blockquote expandable><b><i>ᴘʟᴇᴀꜱᴇ ꜰᴏʀᴡᴀʀᴅ ᴛʜɪꜱ ꜰɪʟᴇ ᴛᴏ ꜱᴏᴍᴇᴡʜᴇʀᴇ ᴇʟꜱᴇ & ꜱᴛᴀʀᴛ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴛʜᴇʀᴇ</i></b></blockquote>"""
-
-
 
     I_CUDNT = """<b>sᴏʀʀʏ ɴᴏ ꜰɪʟᴇs ᴡᴇʀᴇ ꜰᴏᴜɴᴅ ꜰᴏʀ ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ {} 😕
 
@@ -222,16 +216,9 @@ Nᴀᴍᴇ : {}
 
 Mᴇꜱꜱᴀɢᴇ : <b>{}</b>"""
     
-    CAPTION = """
-<b>⚡️ ɴᴀᴍᴇ : </b> <code>{file_name}</code>
+    CAPTION = """<b><a href="https://t.me/dreamxbotz">{file_name}</a></b>\n\n<b>⚜️ Powered By : <a href="https://t.me/dreamxbotz">[ ᴅʀᴇᴀᴍxʙᴏᴛᴢ ]</a></b>"""
 
-<b>ꜱɪᴢᴇ : </b> <code>{file_size}</code>
-
-
-🍁 ᴊᴏɪɴ ɴᴏᴡ :  <a href="https://t.me/filmztube">Filmztube</a>
-
-"""
-
+    
     MOVIE_UPDATE_NOTIFY_TXT = """
 </b><a href={poster_url}>📥</a><a href={imdb_url}>New {tag} Added</a></b>
 
@@ -250,30 +237,15 @@ Mᴇꜱꜱᴀɢᴇ : <b>{}</b>"""
 🔍 <b>Sᴇᴀʀᴄʜ →</b> {search_link}
 """
 
-    IMDB_TEMPLATE_TXT = """
-<b><a href={url}>{title} (<a href={url}/releaseinfo>{year}</a>)
+
+    IMDB_TEMPLATE_TXT = """<b><a href={url}>{title} (<a href={url}/releaseinfo>{year}</a>)
 
 ʀᴀᴛɪɴɢ : <a href={url}/ratings>{rating}</a>
 ɢᴇɴʀᴇ : {genres}
 ᴀᴜᴅɪᴏ : {languages}
 
 sʜᴏᴡɴ ɪɴ : {remaining_seconds} <i>sᴇᴄ</i>⚡️
-<b>ʀᴇǫ ʙʏ : {message.from_user.mention}</b>
-
-ᴘᴏᴡᴇʀᴇᴅ ʙʏ : <b><a href="https://t.me/filmztube">ꜰɪʟᴍᴢᴛᴜʙᴇ</a></b></b>"""
-
-    X_IMDB_TEMPLATE_TXT = """
-<b>
-🔖 : <a href={url}>{title}</a>
-🎭 : {genres}
-📆 : <a href={url}/releaseinfo>{year}</a>
-🌟 : <a href={url}/ratings>{rating}</a>
-🎙️ : {languages}
-
-Shown in: {remaining_seconds} <i>sec</i> 🔥
-<b>Req by : {message.from_user.mention}</b>
-
-★ ᴊᴏɪɴ : <b><a href="https://t.me/filmztube">Filmztube ⎚</a></b></b>"""
+<b>ʀᴇǫ ʙʏ : {message.from_user.mention}</b>"""
 
     LOGO = r"""
     ██████╗░██████╗░███████╗░█████╗░███╗░░░███╗██╗░░██╗██████╗░░█████╗░████████╗███████╗
@@ -292,6 +264,7 @@ Shown in: {remaining_seconds} <i>sec</i> 🔥
     PAGE_TXT = """ᴡʜʏ ᴀʀᴇ ʏᴏᴜ ꜱᴏ ᴄᴜʀɪᴏᴜꜱ ⁉️"""
 
     PURCHASE_TXT = """ꜱᴇʟᴇᴄᴛ ʏᴏᴜʀ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅ."""
+
     
 
     PREMIUM_TEXT = """<blockquote>🎖️ <b>ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs</b></blockquote>
@@ -304,7 +277,7 @@ Shown in: {remaining_seconds} <i>sec</i> 🔥
 ◉ 60 ᴅᴀʏꜱ - 75 ₹  / 75 ꜱᴛᴀʀ
 
 •─────•─────────•─────•
-🏷️ <a href='https://t.me/filmztube'>ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ ᴘʀᴏᴏꜰ</a>
+🏷️ <a href='https://t.me/dreamxbotz'>ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ ᴘʀᴏᴏꜰ</a>
 
 ‼️ ᴍᴜꜱᴛ ꜱᴇɴᴅ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ᴀꜰᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ.
 ‼️ ᴀꜰᴛᴇʀ ꜱᴇɴᴅɪɴɢ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ɢɪᴠᴇ ᴜꜱ ꜱᴏᴍᴇᴛɪᴍᴇꜱ ᴛᴏ ᴀᴅᴅ ʏᴏᴜ ɪɴ ᴘʀᴇᴍɪᴜᴍ ʟɪꜱᴛ."""
@@ -339,6 +312,7 @@ Shown in: {remaining_seconds} <i>sec</i> 🔥
 ʜᴀᴍᴀʀɪ sᴇᴠᴀ ᴋᴀ ᴜᴘʏᴏɢ ᴋᴀʀɴᴇ ᴋᴇ ʟɪʏᴇ ᴅʜᴀɴʏᴀᴠᴀᴀᴅ 🥳  
 ʜᴀᴍᴀʀɪ ᴀɴʏᴀ ʏᴏᴊɴᴀᴏɴ ᴋɪ ᴊᴀᴀɴᴄʜ ᴋᴀʀɴᴇ ᴋᴇ ʟɪʏᴇ <b>/plan</b> ᴘᴀʀ ᴋʟɪᴄᴋ ᴋᴀʀᴇɪɴ।</blockquote>
 """
+
     
     BPREMIUM_TXT = """<blockquote>🎁 <b>ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ</b> :</blockquote>
 
@@ -394,7 +368,7 @@ Shown in: {remaining_seconds} <i>sec</i> 🔥
 ○ ᴍᴜʟᴛɪ-ᴘʟᴀʏᴇʀ sᴛʀᴇᴀᴍɪɴɢ ʟɪɴᴋs
 ○ ᴀᴅ-ғʀᴇᴇ ᴇxᴘᴇʀɪᴇɴᴄᴇ
 
-👨‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ <a href='https://t.me/filmztube'>Owner</a> ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴛʀɪᴀʟ.
+👨‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ <a href='https://t.me/dreamxbotz'>Owner</a> ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴛʀɪᴀʟ.
 
 ➛ ᴜꜱᴇ /plan ᴛᴏ ꜱᴇᴇ ᴀʟʟ ᴏᴜʀ ᴘʟᴀɴꜱ ᴀᴛ ᴏɴᴄᴇ.
 ➛ ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴ ʙʏ ᴜꜱɪɴɢ : /myplan</b>"""
@@ -512,11 +486,8 @@ This Is An Open-Source Project. You Can Use It Freely, But Selling The Source Co
 • /disable  -  <code>ᴅɪꜱᴀʙʟᴇ ᴀ ᴄʜᴀᴛ.</code>
 • /ban  - <code>ʙᴀɴ ᴀ ᴜꜱᴇʀ.</code>
 • /unban  - <code>ᴜɴʙᴀɴ ᴀ ᴜꜱᴇʀ.</code>
-• /channel - <code>ɢᴇᴛ ʟɪꜱᴛ ᴏꜰ ᴛᴏᴛᴀʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘꜱ.</code>
 • /broadcast - <code>ʙʀᴏᴀᴅᴄᴀꜱᴛ ᴀ ᴍᴇꜱꜱᴀɢᴇ ᴛᴏ ᴀʟʟ ᴜꜱᴇʀꜱ.</code>
 • /grp_broadcast - <code>ʙʀᴏᴀᴅᴄᴀsᴛ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀʟʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs.</code>
-• /delg - <code>ᴅᴇʟᴇᴛᴇ ᴀ sᴘᴇᴄɪғɪᴄ ɢʟᴏʙᴀʟ ғɪʟᴛᴇʀ.</code>
-• /delallg - <code>ᴅᴇʟᴇᴛᴇ ᴀʟʟ Gғɪʟᴛᴇʀs ғʀᴏᴍ ᴛʜᴇ ʙᴏᴛ's ᴅᴀᴛᴀʙᴀsᴇ.</code>
 • /deletefiles - <code>ᴅᴇʟᴇᴛᴇ CᴀᴍRɪᴘ ᴀɴᴅ PʀᴇDVD ғɪʟᴇs ғʀᴏᴍ ᴛʜᴇ ʙᴏᴛ's ᴅᴀᴛᴀʙᴀsᴇ.</code>
 • /send - <code>ꜱᴇɴᴅ ᴍᴇꜱꜱᴀɢᴇ ᴛᴏ ᴀ ᴘᴀʀᴛɪᴄᴜʟᴀʀ ᴜꜱᴇʀ.</code>
 • /add_premium - <code>ᴀᴅᴅ ᴀɴʏ ᴜꜱᴇʀ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ.</code>
@@ -542,3 +513,7 @@ This Is An Open-Source Project. You Can Use It Freely, But Selling The Source Co
 • /remove_fsub - ʀᴇᴍᴏᴠᴇ ᴄᴜꜱᴛᴏᴍ ꜰᴏʀᴄᴇ ꜱᴜʙ ᴄʜᴀɴɴᴇʟ.
 • /reset_group - ʀᴇꜱᴇᴛ ʏᴏᴜʀ ꜱᴇᴛᴛɪɴɢꜱ.
 • /details - ᴄʜᴇᴄᴋ ʏᴏᴜʀ ꜱᴇᴛᴛɪɴɢꜱ."""    
+
+
+
+    
