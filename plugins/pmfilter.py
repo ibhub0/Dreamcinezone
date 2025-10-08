@@ -1778,7 +1778,7 @@ async def auto_filter(client, msg, spoll=False):
                 timings["parsing"] += perf_counter() - parse_start
 
                 build_filters_start = perf_counter()
-                stick_id = "CAACAgUAAxkBAAEKEYZk4J0-GB_7BmQYfIWeNtgfq58qaQACcQoAAlNcAVdwoFjRt6KnvDAE"
+                stick_id = "CAACAgIAAxkBAAEPhm5o439f8A4sUGO2VcnBFZRRYxAxmQACtCMAAphLKUjeub7NKlvk2TYE"
                 keyboard = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', callback_data="hiding")]]
                 )
@@ -2061,7 +2061,7 @@ async def auto_filter(client, msg, spoll=False):
         # Build and return summary string
         timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
         overall = send_end_time - overall_start
-        print(f"auto_filter timings: {timing_summary}, total={overall:.4f}s")
+        #print(f"auto_filter timings: {timing_summary}, total={overall:.4f}s")
         return timing_summary
 
     except Exception as e:
@@ -2069,7 +2069,7 @@ async def auto_filter(client, msg, spoll=False):
         # still attempt to return whatever timings we have
         timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
         overall = perf_counter() - overall_start
-        logger.info(f"auto_filter timings (error): {timing_summary}, total={overall:.4f}s")
+        #logger.info(f"auto_filter timings (error): {timing_summary}, total={overall:.4f}s")
         return timing_summary
 
 
