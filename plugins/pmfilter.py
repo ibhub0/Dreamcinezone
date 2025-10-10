@@ -1761,7 +1761,7 @@ async def auto_filter(client, msg, spoll=False):
                 message_text = message.text or ""
                 search = message_text.lower()
 
-                stick_id = "CAACAgUAAxkBAAEKEYZk4J0-GB_7BmQYfIWeNtgfq58qaQACcQoAAlNcAVdwoFjRt6KnvDAE"
+                stick_id = "CAACAgIAAxkBAAEPhm5o439f8A4sUGO2VcnBFZRRYxAxmQACtCMAAphLKUjeub7NKlvk2TYE"
                 keyboard = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', callback_data="hiding")]]
                 )
@@ -1899,8 +1899,7 @@ async def auto_filter(client, msg, spoll=False):
                 text="↭ ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ ↭", callback_data="pages")])
 
         if settings.get('imdb'):
-            TMDB_POSTERSX = await get_admin_setting("TMDB_ON_SEARCH", default=TMDB_ON_SEARCH)
-            imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_POSTERSX else await get_poster(search, file=(files[0]).file_name)
+            imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_POSTERS else await get_poster(search, file=(files[0]).file_name)
         else:
             imdb = None
 
