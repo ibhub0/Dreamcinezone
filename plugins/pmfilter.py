@@ -317,16 +317,20 @@ async def next_page(bot, query):
                 curr_time.second+(curr_time.microsecond/1000000)))
         remaining_seconds = "{:.2f}".format(time_difference.total_seconds())
         dreamx_title = clean_search_text(search)
-        cap = await get_cap(settings, remaining_seconds, files, query, total, dreamx_title, offset+1)
+        cap = None
         try:
             if settings['imdb']:
                 cap = await get_cap(settings, remaining_seconds, files, query, total, dreamx_title, offset)
-                try:
-                    await query.message.edit_caption(caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
-                except Exception as e:
-                    logger.exception(e)
+                if query.message.caption:
+                    try:
+                        await query.message.edit_caption(caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+                    except Exception as e:
+                        logger.exception(e)
+                        await query.message.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+                else:
                     await query.message.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
             else:
+                cap = await get_cap(settings, remaining_seconds, files, query, total, dreamx_title, offset+1)
                 await query.message.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
         except Exception as e:
 
@@ -744,6 +748,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
     req = query.from_user.id
     files, n_offset, total_results = await get_search_results(chat_id, query_input, offset=0, filter=True)
     if not files:
+        BUTTONS[key] = None
         return await query.answer("🚫 ɴᴏ ꜰɪʟᴇꜱ ꜰᴏᴜɴᴅ 🚫", show_alert=True)
 
     temp.GETALL[key] = files
@@ -1723,23 +1728,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
 
 async def auto_filter(client, msg, spoll=False):
-    from time import perf_counter
-    overall_start = perf_counter()
-
+    """
+    Core auto_filter logic with timing/debug logging removed.
+    """
     curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
-    timings = {
-        "parsing": 0.0,
-        "reply_sticker": 0.0,
-        "build_search_filters": 0.0,
-        "get_search_results": 0.0,
-        "ai_spell_check": 0.0,
-        "advantage_spell_chok": 0.0,
-        "prepare_buttons": 0.0,
-        "get_poster": 0.0,
-        "build_caption": 0.0,
-        "send_result": 0.0,
-        "other_overhead": 0.0
-    }
 
     async def _schedule_delete(sent_obj, orig_msg, delay):
         try:
@@ -1756,36 +1748,26 @@ async def auto_filter(client, msg, spoll=False):
             # ignore scheduling errors
             pass
 
+    # initialize to avoid NameError if reply_sticker fails
+    m = None
+
     try:
-        parse_start = perf_counter()
         if not spoll:
             message = msg
             if message.text.startswith("/"):
-                timings["parsing"] += perf_counter() - parse_start
-                overall = perf_counter() - overall_start
-                timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
-                logger.info(f"auto_filter timings: {timing_summary}, total={overall:.4f}s")
-                return timing_summary
+                return
             if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
-                timings["parsing"] += perf_counter() - parse_start
-                overall = perf_counter() - overall_start
-                timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
-                logger.info(f"auto_filter timings: {timing_summary}, total={overall:.4f}s")
-                return timing_summary
+                return
             if len(message.text) < 100:
                 message_text = message.text or ""
                 search = message_text.lower()
-                timings["parsing"] += perf_counter() - parse_start
 
-                build_filters_start = perf_counter()
-                stick_id = "CAACAgUAAxkBAAEKEYZk4J0-GB_7BmQYfIWeNtgfq58qaQACcQoAAlNcAVdwoFjRt6KnvDAE"
+                stick_id = "CAACAgIAAxkBAAEPhm5o439f8A4sUGO2VcnBFZRRYxAxmQACtCMAAphLKUjeub7NKlvk2TYE"
                 keyboard = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', callback_data="hiding")]]
                 )
                 try:
-                    rs_start = perf_counter()
                     m = await message.reply_sticker(sticker=stick_id, reply_markup=keyboard)
-                    timings["reply_sticker"] += perf_counter() - rs_start
                 except Exception as e:
                     logger.exception("reply_sticker failed: %s", e)
 
@@ -1802,19 +1784,14 @@ async def auto_filter(client, msg, spoll=False):
                 search = re.sub(r"\s+", " ", search).strip()
                 search = search.replace("-", " ")
                 search = search.replace(":", "")
-                timings["build_search_filters"] += perf_counter() - build_filters_start
 
-                search_start = perf_counter()
                 files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
-                timings["get_search_results"] += perf_counter() - search_start
 
                 settings = await get_settings(message.chat.id)
                 if not files:
                     if settings.get("spell_check"):
-                        ai_start = perf_counter()
                         ai_sts = await m.edit('🤖 ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ, ᴀɪ ɪꜱ ᴄʜᴇᴄᴋɪɴɢ ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ...')
                         is_misspelled = await ai_spell_check(chat_id=message.chat.id, wrong_name=search)
-                        timings["ai_spell_check"] += perf_counter() - ai_start
 
                         if is_misspelled:
                             await ai_sts.edit(f'✅ Aɪ Sᴜɢɢᴇsᴛᴇᴅ: <code>{is_misspelled}</code>\n🔍 Searching for it...')
@@ -1822,27 +1799,18 @@ async def auto_filter(client, msg, spoll=False):
                             await ai_sts.delete()
                             return await auto_filter(client, message)
                         await ai_sts.delete()
-                        adv_start = perf_counter()
                         result = await advantage_spell_chok(client, message)
-                        timings["advantage_spell_chok"] += perf_counter() - adv_start
-                        timings["other_overhead"] += perf_counter() - overall_start - sum(timings.values())
                         return result
                     else:
                         try:
-                            await m.delete()
+                            if m:
+                                await m.delete()
                         except Exception:
                             pass
-                        adv_start = perf_counter()
                         result = await advantage_spell_chok(client, message)
-                        timings["advantage_spell_chok"] += perf_counter() - adv_start
-                        timings["other_overhead"] += perf_counter() - overall_start - sum(timings.values())
                         return result
             else:
-                timings["parsing"] += perf_counter() - parse_start
-                overall = perf_counter() - overall_start
-                timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
-                logger.info(f"auto_filter timings: {timing_summary}, total={overall:.4f}s")
-                return timing_summary
+                return
         else:
             # spoll branch
             message = msg.message.reply_to_message
@@ -1851,14 +1819,11 @@ async def auto_filter(client, msg, spoll=False):
             settings = await get_settings(message.chat.id)
             await msg.message.delete()
 
-        key_start = perf_counter()
         key = f"{message.chat.id}-{message.id}"
         FRESH[key] = search
         temp.GETALL[key] = files
         temp.SHORT[message.from_user.id] = message.chat.id
-        timings["other_overhead"] += perf_counter() - key_start
 
-        btn_start = perf_counter()
         if settings.get('button'):
             btn = [
                 [
@@ -1904,9 +1869,7 @@ async def auto_filter(client, msg, spoll=False):
                            InlineKeyboardButton(
                                "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}")
                        ])
-        timings["prepare_buttons"] += perf_counter() - btn_start
 
-        page_start = perf_counter()
         if offset != "":
             req = message.from_user.id if message.from_user else 0
             if ULTRA_FAST_MODE:
@@ -1935,14 +1898,11 @@ async def auto_filter(client, msg, spoll=False):
         else:
             btn.append([InlineKeyboardButton(
                 text="↭ ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ ↭", callback_data="pages")])
-        timings["other_overhead"] += perf_counter() - page_start
 
-        poster_start = perf_counter()
-        if settings['imdb']:
-                imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_ON_SEARCH else await get_poster(search, file=(files[0]).file_name)
+        if settings.get('imdb'):
+            imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_POSTER else await get_poster(search, file=(files[0]).file_name)
         else:
             imdb = None
-        timings["get_poster"] += perf_counter() - poster_start
 
         cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
         time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
@@ -1950,12 +1910,10 @@ async def auto_filter(client, msg, spoll=False):
                       seconds=(curr_time.second+(curr_time.microsecond/1000000)))
         remaining_seconds = "{:.2f}".format(time_difference.total_seconds())
 
-        caption_start = perf_counter()
         TEMPLATE = script.IMDB_TEMPLATE_TXT
-        print(TEMPLATE)
         settings = await get_settings(message.chat.id)
         if settings.get('template'):
-            TEMPLATE = settings['template'] 
+            TEMPLATE = settings['template']
 
         if imdb:
             cap = TEMPLATE.format(
@@ -1968,7 +1926,7 @@ async def auto_filter(client, msg, spoll=False):
                 localized_title=imdb['localized_title'],
                 kind=imdb['kind'],
                 imdb_id=imdb["imdb_id"],
-                cast=imdb["cast"],
+                cast=imdb['cast'],
                 runtime=imdb['runtime'],
                 countries=imdb['countries'],
                 certificates=imdb['certificates'],
@@ -1995,6 +1953,7 @@ async def auto_filter(client, msg, spoll=False):
                 for idx, file in enumerate(files, start=1):
                     cap += f"<b>\n{idx}. <a href='https://telegram.me/{temp.U_NAME}?start=file_{message.chat.id}_{file.file_id}'>[{get_size(file.file_size)}] {clean_filename(file.file_name)}\n</a></b>"
         else:
+            temp.IMDB_CAP[message.from_user.id] = None
             if ULTRA_FAST_MODE:
                 if settings.get('button'):
                     cap = f"<b>🏷 ᴛɪᴛʟᴇ : <code>{search}</code>\n⏰ ʀᴇsᴜʟᴛ ɪɴ : <code>{remaining_seconds} Sᴇᴄᴏɴᴅs</code>\n\n📝 ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ : {message.from_user.mention}\n⚜️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : ⚡ {message.chat.title or temp.B_LINK or 'ᴅʀᴇᴀᴍxʙᴏᴛᴢ'} \n\n<u>Your Requested Files Are Here</u> \n\n</b>"
@@ -2010,68 +1969,49 @@ async def auto_filter(client, msg, spoll=False):
 
                     for idx, file in enumerate(files, start=1):
                         cap += f"<b>\n{idx}. <a href='https://telegram.me/{temp.U_NAME}?start=file_{message.chat.id}_{file.file_id}'>[{get_size(file.file_size)}] {clean_filename(file.file_name)}\n</a></b>"
-        timings["build_caption"] += perf_counter() - caption_start
 
-        # ---------- SEND RESULT (measure only the send) ----------
-        send_start = perf_counter()
         sent = None
         try:
             if imdb and imdb.get('poster'):
                 try:
-                    sent = await message.reply_photo(photo=imdb.get('poster') if not LANDSCAPE_POSTER and imdb.get('backdrop') else imdb.get('backdrop'), caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
-                    await m.delete()
+                    if TMDB_POSTER:
+                        photo = imdb.get('backdrop') if imdb.get('backdrop') and LANDSCAPE_POSTER else imdb.get('poster')
+                    else:
+                        photo = imdb.get('poster')
+                    sent = await message.reply_photo(photo=photo, caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+                    if m:
+                        await m.delete()
                 except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
                     pic = imdb.get('poster')
                     poster = pic.replace('.jpg', "._V1_UX360.jpg")
                     sent = await message.reply_photo(photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
-                    await m.delete()
+                    if m:
+                        await m.delete()
                 except Exception as e:
                     logger.exception(e)
                     sent = await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
             else:
                 sent = await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
-                await m.delete()
+                if m:
+                    await m.delete()
         except Exception as e:
-            # best-effort: if sending failed, log and re-raise to preserve behavior
             logger.exception("Failed to send result: %s", e)
-            timings["send_result"] += perf_counter() - send_start
-            send_end_time = perf_counter()
-            timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
-            overall = send_end_time - overall_start
-            logger.info(f"auto_filter timings: {timing_summary}, total={overall:.4f}s")
-            return timing_summary
+            return
 
-        send_end = perf_counter()
-        timings["send_result"] += send_end - send_start
-
-        # schedule auto-delete in background (do NOT await) so send timing isn't blocked
         try:
             if settings.get('auto_delete'):
                 asyncio.create_task(_schedule_delete(sent, message, DELETE_TIME))
         except KeyError:
-            # if setting missing, preserve previous behavior but schedule deletion after saving setting
             try:
                 await save_group_settings(message.chat.id, 'auto_delete', True)
             except Exception:
                 pass
             asyncio.create_task(_schedule_delete(sent, message, DELETE_TIME))
-
-        # ---------- DONE: compute timing summary up to send ----------
-        send_end_time = perf_counter()
-        # Build and return summary string
-        timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
-        overall = send_end_time - overall_start
-        print(f"auto_filter timings: {timing_summary}, total={overall:.4f}s")
-        return timing_summary
+        return
 
     except Exception as e:
         logger.exception(e)
-        # still attempt to return whatever timings we have
-        timing_summary = ", ".join([f"{k}={v:.4f}s" for k, v in timings.items()])
-        overall = perf_counter() - overall_start
-        logger.info(f"auto_filter timings (error): {timing_summary}, total={overall:.4f}s")
-        return timing_summary
-
+        return
 
 async def ai_spell_check(chat_id, wrong_name):
     async def search_movie(wrong_name):
