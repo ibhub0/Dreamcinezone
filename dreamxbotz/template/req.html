@@ -245,6 +245,7 @@
 
         .video-container video {
             width: 100%;
+            height: auto;
             aspect-ratio: 16/9;
             object-fit: cover;
             display: block;
@@ -599,6 +600,10 @@
             background: linear-gradient(135deg, var(--primary-pink), #db2777);
             color: white;
         }
+        .card-btn:nth-child(4) {
+            background: linear-gradient(135deg, var(--primary-orange), #d97706);
+            color: white;
+        }
 
         .card-btn:hover {
             transform: translateY(-2px);
@@ -711,6 +716,30 @@
             border-radius: 4px;
         }
 
+        @media (max-width: 768px) {
+
+            .size-control {
+                display: none !important;
+            }
+
+            .plyr__progress {
+                flex-basis: 100% !important;
+                width: 100% !important;
+                margin-top: 6px !important;
+                order: 10 !important; 
+            }
+            .plyr__time {
+                width: auto !important;
+                margin-left: 20px !important;
+                
+            }
+            .plyr__controls .plyr__volume input[type="range"] {
+                width: auto !important;    
+                height: 5px !important;    
+            }
+
+        }
+
         /* Written by @bharath_boy || the credit should not be deleted */
     </style>
 </head>
@@ -728,7 +757,7 @@
             <nav class="nav">
                 <a href="#video-section">Stream</a>
                 <a href="#explore-section">Explore</a>
-                <a href="http://t.me/BHARATHboi_bot">Contact</a>
+                <a href="https://t.me/dreamxbotz">Contact</a>
             </nav>
 
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
@@ -739,7 +768,7 @@
         <nav class="mobile-nav" id="mobile-nav">
             <a href="#video-section" onclick="closeMobileMenu()">Stream</a>
             <a href="#explore-section" onclick="closeMobileMenu()">Explore</a>
-            <a href="http://t.me/BHARATHboi_bot" onclick="closeMobileMenu()">Contact</a>
+            <a href="https://t.me/dreamxbotz" onclick="closeMobileMenu()">Contact</a>
         </nav>
     </header>
 
@@ -822,6 +851,7 @@
                         <p>Get the latest updates from our main channel for exclusive content and real-time
                             notifications.</p>
                         <div class="card-links">
+                            <a href="https://t.me/dreamxbotz" class="card-btn">DreamXbotz</a>
                             <a href="https://t.me/Blaze_Updatez" class="card-btn">Join Blaze Updates</a>
                             <a href="https://t.me/anime_cartoon_stickers" class="card-btn">Anime Stickers</a>
                         </div>
@@ -835,6 +865,7 @@
                         <p>Interact with our intelligent bots for an enhanced streaming experience and automated
                             assistance.</p>
                         <div class="card-links">
+                            <a href="https://t.me/dreamxbotz" class="card-btn">DreamXbotz</a>
                             <a href="https://t.me/Blaze_Moviesposter_downloaderbot" class="card-btn">PosterFlix Bot</a>
                             <a href="https://t.me/video_thumbcover_changerbot" class="card-btn">Thumb Changer</a>
                             <a href="https://t.me/Blaze_forward_bot" class="card-btn">Forward Bot Pro</a>
