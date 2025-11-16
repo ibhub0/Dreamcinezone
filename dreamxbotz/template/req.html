@@ -721,21 +721,28 @@
             .size-control {
                 display: none !important;
             }
+            .plyr__controls {
+                justify-content: center !important;
+                flex-wrap: wrap !important;
+                width: auto !important;
+            }
 
             .plyr__progress {
-                flex-basis: 100% !important;
-                width: 100% !important;
-                margin-top: 6px !important;
-                order: 10 !important; 
+                flex-basis: 10px !important;
+                width: auto !important;
+                margin: 10px 0 !important;
             }
             .plyr__time {
                 width: auto !important;
-                margin-left: 20px !important;
+                margin-left: 15px !important;
                 
             }
-            .plyr__controls .plyr__volume input[type="range"] {
-                width: auto !important;    
-                height: 5px !important;    
+            .plyr__volume {
+                width: 0 50% !important;    
+                flex-basis: auto !important;
+            }
+            .plyr__mute {
+                margin-right: 10px !important;
             }
 
         }
