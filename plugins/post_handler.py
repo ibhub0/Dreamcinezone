@@ -18,7 +18,6 @@ from utils import temp
 logger = logging.getLogger(__name__)
 post_sessions = {}
 
-BOT_NAME = temp.U_NAME
 USE_GETFILE_BUTTON_BY_DEFAULT = True
 DEFAULT_WATERMARK = "Join [ᴅʀᴇᴀᴍxʙᴏᴛᴢ](https://t.me/dreamxbotz)"
 LANGUAGES_FORMAT = "➥ <b>Languages :</b> <code>{langs}</code>"
@@ -175,7 +174,7 @@ async def start_post_session(client: Client, message: Message, user_id: int, mov
         year = movie_details.get("year", "")
         movie_year = f"{title} {year}".strip()
         movie_year = re.sub(r"[ *:\.]", "-", movie_year)
-        url = f"https://t.me/{BOT_NAME}?start=getfile-{movie_year}"
+        url = f"https://telegram.me/{temp.U_NAME}?start=getfile-{movie_year}"
         post_sessions[user_id]["buttons"].append(
             [InlineKeyboardButton("📥 Get Files 📥", url=url)])
         logger.info(f"Default 'Get Files' button added for session {user_id}")
@@ -454,7 +453,7 @@ async def handle_add_get_files(session):
         title = movie_details.get("title", "movie")
         year = movie_details.get("year", "")
         movie_year = f"{title} {year}".strip()
-        url = f"https://t.me/{BOT_NAME}?start=getfile-{movie_year.replace(' ', '-')}"
+        url = f"https://telegram.me/{temp.U_NAME}?start=getfile-{movie_year.replace(' ', '-')}"
         session["buttons"].append(
             [InlineKeyboardButton("📥 Get Files 📥", url=url)])
 
