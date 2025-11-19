@@ -25,6 +25,8 @@ async def broadcast_cancel(bot, query):
 
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
 async def broadcast_users(bot, message):
+    if not message.reply_to_message:
+        return await message.reply("<b>Reply to a message to broadcast.</b>")
     if lock.locked():
         return await message.reply("⚠️ Another broadcast is in progress. Please wait...")
     ask = await message.reply(
@@ -106,6 +108,8 @@ async def broadcast_users(bot, message):
 
 @Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS) & filters.reply)
 async def broadcast_group(bot, message):
+    if not message.reply_to_message:
+        return await message.reply("<b>Reply to a message to group broadcast.</b>")
     ask = await message.reply(
         "<b>Do you want to pin this message in groups?</b>",
         reply_markup=ReplyKeyboardMarkup([["Yes", "No"]], one_time_keyboard=True, resize_keyboard=True)
