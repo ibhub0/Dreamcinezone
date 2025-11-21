@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 IGNORE_WORDS = {
     "rarbg", "dub", "sub", "sample", "mkv", "aac", "combined",
     "action", "adventure", "animation", "biography", "comedy", "crime", 
-    "documentary", "drama", "family", "fantasy", "film-noir", "history", 
+    "documentary", "drama", "fantasy", "film-noir", "history", 
     "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", 
     "thriller", "war", "western", "hdcam", "hdtc", "camrip", "ts", "tc", 
     "telesync", "dvdscr", "dvdrip", "predvd", "webrip", "web-dl", "tvrip", 
