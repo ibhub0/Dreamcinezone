@@ -7,7 +7,6 @@ umongo
 requests
 bs4
 shortzy
-datetime
 pytz
 aiohttp
 
@@ -32,7 +31,8 @@ pyshorteners
 pyromod
 colorama
 fuzzywuzzy
-Levenshtein==0.24.0
+python-Levenshtein==0.27.1
 
 # Git-based Packages
 git+https://github.com/DreamXBotz/cinemagoer
+
