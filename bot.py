@@ -1,3 +1,4 @@
+import plugins.monkey_patch
 import sys
 import glob
 import importlib
