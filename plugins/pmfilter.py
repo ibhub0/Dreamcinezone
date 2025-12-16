@@ -834,7 +834,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
     await query.answer()
 
 
-@Client.on_callback_query()
+@Client.on_callback_query(group=10)
 async def cb_handler(client: Client, query: CallbackQuery):
     DreamxData = query.data
     try:
