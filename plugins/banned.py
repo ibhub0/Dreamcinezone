@@ -1,4 +1,4 @@
-from pyrogram import Client, filters
+from pyrogram import Client, filters , StopPropagation
 from utils import temp
 from pyrogram.types import Message
 from database.users_chats_db import db
@@ -16,12 +16,13 @@ async def disabled_chat(_, client, message: Message):
     return message.chat.id in temp.BANNED_CHATS
 disabled_group=filters.create(disabled_chat)
 
-@Client.on_message(filters.private & banned_user & filters.incoming)
+@Client.on_message(filters.private & banned_user & filters.incoming , group=-1)
 async def ban_reply(bot, message):
     ban = await db.get_ban_status(message.from_user.id)
     await message.reply(f'Sorry Dude, You are Banned to use Me. \nBan Reason : {ban["ban_reason"]}')
+    raise StopPropagation
 
-@Client.on_message(filters.group & disabled_group & filters.incoming)
+@Client.on_message(filters.group & disabled_group & filters.incoming , group=-1)
 async def grp_bd(bot, message):
     buttons = [[
         InlineKeyboardButton('Support', url=SUPPORT_CHAT)
@@ -36,3 +37,4 @@ async def grp_bd(bot, message):
     except:
         pass
     await bot.leave_chat(message.chat.id)
+    raise StopPropagation

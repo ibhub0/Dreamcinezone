@@ -74,7 +74,7 @@ async def give_filter(client, message):
         )
 
 
-@Client.on_message(filters.private & filters.text & filters.incoming & ~filters.regex(r"^/"))
+@Client.on_message(filters.private & filters.text & filters.incoming & ~filters.regex(r"^/") & ~filters.regex(r"(https?://)?(t\.me|telegram\.me|telegram\.dog)/"))
 async def pm_text(bot, message):
     bot_id = bot.me.id
     content = message.text
@@ -834,7 +834,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
     await query.answer()
 
 
-@Client.on_callback_query()
+@Client.on_callback_query(group=10)
 async def cb_handler(client: Client, query: CallbackQuery):
     DreamxData = query.data
     try:
@@ -2043,17 +2043,24 @@ async def advantage_spell_chok(client, message):
     query = query.strip() + " movie"
     try:
         movies = await get_poster(search, bulk=True)
-    except:
-        k = await message.reply(script.I_CUDNT.format(message.from_user.mention))
-        await asyncio.sleep(60)
-        await k.delete()
+    except Exception as e:
+        logger.exception("get_poster failed for query=%s: %s", query, e)
+        try:
+            k = await message.reply(script.I_CUDNT.format(message.from_user.mention))
+            await asyncio.sleep(60)
+            try:
+                await k.delete()
+            except Exception:
+                pass
+        except Exception:
+            pass
         try:
             await message.delete()
-        except:
+        except Exception:
             pass
         return
     if not movies:
-        google = search.replace(" ", "+")
+        google = quote_plus(search)
         button = [[InlineKeyboardButton(
             "🔍 ᴄʜᴇᴄᴋ sᴘᴇʟʟɪɴɢ ᴏɴ ɢᴏᴏɢʟᴇ 🔍", url=f"https://www.google.com/search?q={google}")]]
         k = await message.reply_text(text=script.I_CUDNT.format(search), reply_markup=InlineKeyboardMarkup(button))
