@@ -140,7 +140,7 @@ async def save_file(media):
             f"[ERROR] Failed commit of '{file_name}' to {target_db} DB.", exc_info=e
         )
         return False, 3
-    logger.info(f"[SUCCESS] '{file_name}' saved to {target_db} DB.")
+    #logger.info(f"[SUCCESS] '{file_name}' saved to {target_db} DB.")
     return True, 1
 
 async def get_search_results(chat_id, query, file_type=None, max_results=None, offset=0, filter=False):
