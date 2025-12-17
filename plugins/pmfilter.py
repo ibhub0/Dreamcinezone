@@ -40,10 +40,11 @@ SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
-    if EMOJI_MODE and not client.is_bot:
+    if EMOJI_MODE:
         try:
             await message.react(emoji=random.choice(REACTIONS), big=True)
         except Exception:
+            await message.react(emoji="⚡️")
             pass
     await mdb.update_top_messages(message.from_user.id, message.text)
     if message.chat.id != SUPPORT_CHAT_ID:
@@ -80,10 +81,11 @@ async def pm_text(bot, message):
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
-    if EMOJI_MODE and not bot.is_bot:
+    if EMOJI_MODE:
         try:
             await message.react(emoji=random.choice(REACTIONS), big=True)
         except Exception:
+            await message.react(emoji="⚡️")
             pass
     if content.startswith(("#")):
         return
