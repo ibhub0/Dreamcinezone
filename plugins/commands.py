@@ -31,11 +31,11 @@ BATCH_FILES = {}
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    if EMOJI_MODE:
+    if EMOJI_MODE and not client.is_bot:
         try:
             await message.react(emoji=random.choice(REACTIONS), big=True)
         except Exception:
-            await message.react(emoji="⚡️", big=True)
+            pass
     m = message
     if len(m.command) == 2 and m.command[1].startswith(('notcopy', 'sendall')):
         _, userid, verify_id, file_id = m.command[1].split("_", 3)
