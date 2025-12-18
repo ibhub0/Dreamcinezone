@@ -28,7 +28,6 @@ ffmpeg-python==0.2.0
 jinja2
 apscheduler
 pyshorteners
-pyromod
 colorama
 fuzzywuzzy
 python-Levenshtein==0.27.1
