@@ -3,7 +3,8 @@ from utils import temp
 from pyrogram.types import Message
 from database.users_chats_db import db
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from info import SUPPORT_CHAT
+from info import SUPPORT_CHAT, ADMINS
+import os
 
 async def banned_users(_, client, message: Message):
     return (
@@ -11,6 +12,29 @@ async def banned_users(_, client, message: Message):
     ) and message.from_user.id in temp.BANNED_USERS
 
 banned_user = filters.create(banned_users)
+
+@Client.on_message(filters.command('banned') & filters.user(ADMINS))
+async def get_banned(client, message):
+    banned_users, _ = await db.get_banned()
+    if not banned_users:
+        await message.reply_text("No banned users found.")
+        return
+    
+    text = ""
+    for user_id in banned_users:
+        try:
+            user = await client.get_users(user_id)
+            text += f"{user.mention} (`{user.id}`)\n"
+        except Exception:
+            text += f"Undefined (`{user_id}`)\n"
+    
+    if len(text) > 4096:
+        with open('banned_users.txt', 'w') as f:
+            f.write(text)
+        await message.reply_document('banned_users.txt')
+        os.remove('banned_users.txt')
+    else:
+        await message.reply_text(text)
 
 async def disabled_chat(_, client, message: Message):
     return message.chat.id in temp.BANNED_CHATS

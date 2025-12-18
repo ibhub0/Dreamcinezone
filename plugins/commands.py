@@ -797,8 +797,7 @@ async def deletemultiplefiles(bot, message):
     chat_type = message.chat.type
     if chat_type != enums.ChatType.PRIVATE:
         return await message.reply_text(f"<b>Hey {message.from_user.mention}, This command won't work in groups. It only works on my PM !</b>")
-    else:
-        pass
+
     try:
         keyword = message.text.split(" ", 1)[1]
     except:
@@ -1417,3 +1416,43 @@ async def remove_fsub(client, message):
     except Exception as e:
         print(f"[ERROR] remove_fsub: {e}")
         await message.reply_text(f"⚠️ ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ: {e}")
+
+@Client.on_message(filters.command('clean_groups') & filters.user(ADMINS))
+async def clean_groups_handler(client, message):
+    msg = await message.reply('Cleaning groups... This may take a while.', quote=True)
+    deleted_count = 0
+    total_groups = await db.total_chat_count()
+    processed = 0
+    batch_size = 100
+    chats = await db.get_all_chats()
+    async for chat in chats:
+        try:
+            processed += 1
+            chat_id = chat['id']
+            try:
+                await client.get_chat_member(chat_id, client.me.id)
+            except FloodWait as e:
+                await asyncio.sleep(e.value)
+                try:
+                    await client.get_chat_member(chat_id, client.me.id)
+                except (UserNotParticipant, PeerIdInvalid, ChannelInvalid):
+                    await db.delete_chat(chat_id)
+                    deleted_count += 1
+                except Exception:
+                    pass
+            except (UserNotParticipant, PeerIdInvalid, ChannelInvalid):
+                await db.delete_chat(chat_id)
+                deleted_count += 1
+            except Exception as e:
+                print(f'Error checking chat {chat_id}: {e}')
+                pass
+            if processed % batch_size == 0:
+                try:
+                    await msg.edit(f'Progress: {processed}/{total_groups}\nDeleted: {deleted_count}')
+                    await asyncio.sleep(2)
+                except FloodWait as e:
+                    await asyncio.sleep(e.value)
+                    await msg.edit(f'Progress: {processed}/{total_groups}\nDeleted: {deleted_count}')
+        except Exception as e:
+            print(f'Error in clean_groups loop: {e}')
+    await msg.edit(f'**Clean Groups Complete**\n\nTotal Processed: {processed}\nDeleted: {deleted_count}')
