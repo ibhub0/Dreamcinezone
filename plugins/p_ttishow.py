@@ -3,7 +3,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
 from info import ADMINS,MULTIPLE_DB, LOG_CHANNEL, OWNER_LNK, MELCOW_PHOTO
 from database.users_chats_db import db, db2
-from database.ia_filterdb import Media, Media2, db as db_stats, db2 as db2_stats
+from database.ia_filterdb import Media, Media2, db as db_stats, db2 as db2_stats, client, client2
 from utils import get_size, temp, get_settings, get_readable_time
 from Script import script
 from pyrogram.errors import ChatAdminRequired
@@ -165,23 +165,51 @@ async def get_stats(bot, message):
         premium = await db.all_premium_users()
         file1 = await Media.count_documents()
         DB_SIZE = 512 * 1024 * 1024
+        
+        # Calculate size for Current Primary DB
         dbstats = await db_stats.command("dbStats")
-        db_size = dbstats['dataSize'] + dbstats['indexSize']
+        current_db_size = dbstats['storageSize'] + dbstats['indexSize']
+
+        # Calculate total size for Primary DB Cluster
+        dbs = await client.list_database_names()
+        db_size = 0
+        for db_name in dbs:
+            if db_name in ["admin", "local"]:
+                continue
+            stats = await client[db_name].command("dbStats")
+            db_size += stats['storageSize'] + stats['indexSize']
+            
         free = DB_SIZE - db_size
         uptime = get_readable_time(time() - botStartTime)
         ram = psutil.virtual_memory().percent
         cpu = psutil.cpu_percent()
+        
         if MULTIPLE_DB == False:
             await msg.edit(script.STATUS_TXT.format(
-                total_users, totl_chats, premium, file1, get_size(db_size), get_size(free), uptime, ram, cpu))                                               
+                total_users, totl_chats, premium, file1, get_size(current_db_size), get_size(db_size), get_size(free), uptime, ram, cpu))                                               
             return
+            
         file2 = await Media2.count_documents()
+        
+        # Calculate size for Current Secondary DB
         db2stats = await db2_stats.command("dbStats")
-        db2_size = db2stats['dataSize'] + db2stats['indexSize']
+        current_db2_size = db2stats['storageSize'] + db2stats['indexSize']
+
+        # Calculate total size for Secondary DB Cluster
+        dbs2 = await client2.list_database_names()
+        db2_size = 0
+        for db_name in dbs2:
+            if db_name in ["admin", "local"]:
+                continue
+            stats = await client2[db_name].command("dbStats")
+            db2_size += stats['storageSize'] + stats['indexSize']
+            
         free2 = DB_SIZE - db2_size
+        
         await msg.edit(script.MULTI_STATUS_TXT.format(
-            total_users, totl_chats, premium, file1, get_size(db_size), get_size(free),
-            file2, get_size(db2_size), get_size(free2), uptime, ram, cpu, (int(file1) + int(file2))
+            total_users, totl_chats, premium, file1, get_size(current_db_size), get_size(db_size), get_size(free),
+            file2, get_size(current_db2_size), get_size(db2_size), get_size(free2), 
+            uptime, ram, cpu, (int(file1) + int(file2))
             ))
     except Exception as e:
        print(f"Error In stats :- {e}")        
