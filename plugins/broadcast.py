@@ -23,7 +23,7 @@ async def broadcast_cancel(bot, query):
         temp.B_GROUPS_CANCEL = True
         await query.message.edit("🛑 ᴛʀʏɪɴɢ ᴛᴏ ᴄᴀɴᴄᴇʟ ɢʀᴏᴜᴘꜱ ʙʀᴏᴀᴅᴄᴀꜱᴛɪɴɢ...")
 
-@Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
+@Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.private)
 async def broadcast_users(bot, message):
     if not message.reply_to_message:
         return await message.reply("<b>Reply to a message to broadcast.</b>",parse_mode=enums.ParseMode.HTML)
@@ -106,7 +106,7 @@ async def broadcast_users(bot, message):
     await dreamxbotz_status_msg.edit(final_status)
 
 
-@Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS) & filters.reply)
+@Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS) & filters.private)
 async def broadcast_group(bot, message):
     if not message.reply_to_message:
         return await message.reply("<b>Reply to a message to group broadcast.</b>", parse_mode=enums.ParseMode.HTML)
