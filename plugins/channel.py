@@ -87,7 +87,7 @@ EP_ONLY_RANGE = re.compile(r'\b(?:EP|Episode)0*(\d{1,3})\s*-\s*0*(\d{1,3})\b',re
 MEDIA_FILTER = filters.document | filters.video | filters.audio
 locks = defaultdict(asyncio.Lock)
 pending_updates = {}
-
+error_tmdb = False
 
 def clean_mentions_links(text: str) -> str:
     return CLEAN_PATTERN.sub("", text or "").strip()
@@ -132,7 +132,6 @@ def schedule_update(bot, base_name, delay=5):
         delay,
         lambda: asyncio.create_task(update_movie_message(bot, base_name))
     )
-
 def extract_media_info(filename: str, caption: str):
     filename = normalize(clean_mentions_links(filename).title())
     caption_clean = clean_mentions_links(caption).lower() if caption else ""
@@ -184,7 +183,57 @@ def extract_media_info(filename: str, caption: str):
     if base_name.endswith(")"):
         base_name = re.sub(r"\s+\(\d{4}\)$", "", base_name)
         if year:
-            base_name += f" ({year})"
+            base_name += f" {year}"
+
+    # -------------------------
+    # NEW: strip season/episode tokens from final base_name
+    # -------------------------
+    def _strip_season_episode_tokens(name: str) -> str:
+        """
+        Remove common season/episode markers from a title while preserving a trailing year.
+        Examples removed: S01, s01e02, 1x02, season 1, ep 02, episode 2, part 1
+        """
+        if not name:
+            return name
+
+        # Preserve trailing year (e.g. "Title (2020)" or "Title 2020")
+        year_match = re.search(r'\(?\b(19|20)\d{2}\b\)?\s*$', name)
+        year_part = ""
+        if year_match:
+            year_part = year_match.group(0)
+            name = name[:year_match.start()].strip()
+
+        # Common patterns to remove
+        patterns = [
+            r'\bS\d{1,2}E\d{1,2}\b',     # S01E02
+            r'\bS\d{1,2}\b',             # S01
+            r'\bE\d{1,2}\b',             # E02
+            r'\b\d{1,2}x\d{1,2}\b',      # 1x02
+            r'\bSeason\s*\d{1,2}\b',     # Season 1
+            r'\bEp(?:isode)?\.?\s*\d{1,3}\b',  # Ep02, Episode 2
+            r'\bEpisode\s*\d{1,3}\b',
+            r'\bPart\s*\d{1,2}\b'
+        ]
+
+        for p in patterns:
+            name = re.sub(p, ' ', name, flags=re.IGNORECASE)
+
+        # Remove leftover separators and extra whitespace
+        name = re.sub(r'[_\.\-]+', ' ', name)     # underscores/dots/hyphens
+        name = re.sub(r'\s+', ' ', name).strip()
+
+        # Reattach year in canonical form if we removed it earlier
+        if year_part:
+            y = re.search(r'(19|20)\d{2}', year_part)
+            if y:
+                name = f"{name} {y.group(0)}"
+
+        return name.strip()
+
+    base_name = _strip_season_episode_tokens(base_name)
+    # If stripping accidentally removed everything, fall back to a safer value
+    if not base_name:
+        base_name = normalize(remove_ignored_words(normalize(processed_raw))) or filename
 
     return {
         "processed": normalize(processed_raw),
@@ -197,6 +246,7 @@ def extract_media_info(filename: str, caption: str):
         "ott_platform": ott_platform,
         "language": language
     }
+
 
 @Client.on_message(filters.chat(CHANNELS) & MEDIA_FILTER)
 async def media_handler(bot, message):
@@ -230,16 +280,15 @@ async def process_and_send_update(bot, filename, caption):
         async with lock:
             await _process_with_lock(bot, filename, caption, media_info, base_name, processed)
     except PyMongoError as e:
-        logger.error("Database error: %s", e)
+        logger.error(f"Database error in process_and_send_update: {e}")
     except Exception as e:
-        logger.exception("Processing failed: %s", e)
+        logger.exception(f"Processing failed in process_and_send_update: {e}")
 
 async def _process_with_lock(bot, filename, caption, media_info, base_name, processed):
     if not hasattr(db, 'movie_updates'):
         db.movie_updates = db.db.movie_updates
 
     movie_doc = await db.movie_updates.find_one({"_id": base_name})
-    global error_tmdb
     error_tmdb=False
     file_data = {
         "filename": filename,
@@ -256,7 +305,7 @@ async def _process_with_lock(bot, filename, caption, media_info, base_name, proc
     if not movie_doc:
         if TMDB_POSTER:
             details = await get_movie_detailsx(base_name)
-            if details.get("error"):
+            if details.get("error") or not details.get("poster_url") and not details.get("backdrop_url"):
                 error_tmdb=True
                 logger.info("TMDB error switching to IMDB")
                 details = await get_movie_details(base_name) or {}
@@ -272,15 +321,17 @@ async def _process_with_lock(bot, filename, caption, media_info, base_name, proc
         movie_doc = {
             "_id": base_name,
             "files": [file_data],
-            "poster_url": details.get("backdrop_url") if LANDSCAPE_POSTER and TMDB_POSTER and not error_tmdb else details.get("poster_url"),
+            "poster_url": details.get("backdrop_url") if LANDSCAPE_POSTER and TMDB_POSTER and details.get("backdrop_url") and not error_tmdb else details.get("poster_url"),
             "genres": genres,
             "rating": details.get("rating", "N/A"),
-            "imdb_url": details.get("url", "")if not TMDB_POSTER else details.get("tmdb_url"),
+            "imdb_url": details.get("url", "")if not TMDB_POSTER or error_tmdb else details.get("tmdb_url"),
             "year": media_info["year"] or details.get("year"),
             "tag": media_info["tag"],
             "ott_platform": media_info["ott_platform"],
             "message_id": None,
-            "is_photo": False
+            "is_photo": False,
+            "error_tmdb": error_tmdb,
+            "is_backdrop": details.get("backdrop_url")
         }
         try:
             await db.movie_updates.insert_one(movie_doc)
@@ -323,9 +374,9 @@ async def send_movie_update(bot, base_name):
                     url=f"https://t.me/{temp.U_NAME}?start=getfile-{base_name.replace(' ', '-')}"
                 )
             ]])
-
+            size=(2560, 1440) if LANDSCAPE_POSTER and TMDB_POSTER and movie_doc.get("is_backdrop") and not movie_doc.get("error_tmdb") else (853, 1280)
             if movie_doc.get("poster_url") and not LINK_PREVIEW:
-                resized_poster = await fetch_image(movie_doc["poster_url"], size=(2560, 1440) if LANDSCAPE_POSTER and TMDB_POSTER and not error_tmdb else (853, 1280))
+                resized_poster = await fetch_image(movie_doc["poster_url"], size)
                 msg = await bot.send_photo(
                     chat_id=MOVIE_UPDATE_CHANNEL,
                     photo=resized_poster,
@@ -400,7 +451,8 @@ async def update_movie_message(bot, base_name):
                     disable_web_page_preview=not LINK_PREVIEW
                 )
             return
-        except (MessageIdInvalid, MessageNotModified):
+        except (MessageIdInvalid, MessageNotModified) as e:
+            logger.warning(f"Message update skipped due to error: {e}")
             pass
         except Exception:
             try:
@@ -412,11 +464,12 @@ async def update_movie_message(bot, base_name):
                     {"_id": base_name},
                     {"$set": {"message_id": None, "is_photo": False}}
                 )
-            except Exception:
+            except Exception as e:
+                logger.error(f"Error during message deletion/update in recovery: {e}")
                 pass
             await send_movie_update(bot, base_name)
     except Exception as e:
-        logger.error(f"Failed to update movie message: {e}")
+        logger.error(f"Failed to update movie message for {base_name}: {e}")
 
 def generate_movie_message(movie_doc, base_name):
     all_qualities = set()
