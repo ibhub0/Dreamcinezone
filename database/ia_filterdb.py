@@ -125,8 +125,8 @@ async def save_file(media):
             caption=(media.caption.html if media.caption and INDEX_CAPTION else None),
             cover=cover_to_use if COVERX else None,
         )
-    except ValidationError as e:
-        logger.exception(f"[VALIDATION ERROR] '{file_name}' → {e}")
+    except Exception as e:
+        logger.exception(f"[ERROR] '{file_name}' → {e}")
         return False, 2
     try:
         await record.commit()

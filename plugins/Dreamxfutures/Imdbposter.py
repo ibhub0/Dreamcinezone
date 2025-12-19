@@ -12,34 +12,40 @@ logger = logging.getLogger(__name__)
 ia = Cinemagoer()
 LONG_IMDB_DESCRIPTION = False
 
-def list_to_str(lst):
-    if lst:
-        return ", ".join(map(str, lst))
-    return ""
-
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore", Image.DecompressionBombWarning)
+
+_session: aiohttp.ClientSession | None = None
+
+
+async def get_session():
+    global _session
+    if _session is None or _session.closed:
+        _session = aiohttp.ClientSession()
+    return _session
+
+
 async def fetch_image(url, size=(860, 1200)):
     if not DREAMXBOTZ_IMAGE_FETCH:
         logger.info("Image fetching is disabled.")
-        return None
+        return url
 
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status != 200:
-                    logger.error(f"Failed to fetch image: {response.status}")
-                    return None
+        session = await get_session()
 
-                data = await response.read()
-                img = Image.open(BytesIO(data))
-                img = img.resize(size, Image.LANCZOS)
+        async with session.get(url) as response:
+            if response.status != 200:
+                logger.error(f"Failed to fetch image: {response.status} for {url}")
+                return None
 
+            data = await response.read()
+            img = Image.open(BytesIO(data))
+            img = img.resize(size, Image.LANCZOS)
 
-                out = BytesIO()
-                img.save(out, format="JPEG")
-                out.seek(0)
-                return out
+            out = BytesIO()
+            img.save(out, format="JPEG")
+            out.seek(0)
+            return out
 
     except aiohttp.ClientError as e:
         logger.error(f"HTTP request error in fetch_image: {e}")
@@ -50,6 +56,16 @@ async def fetch_image(url, size=(860, 1200)):
 
     return None
 
+
+async def close_session():
+    global _session
+    if _session and not _session.closed:
+        await _session.close()
+
+def list_to_str(lst):
+    if lst:
+        return ", ".join(map(str, lst))
+    return ""
 
 async def get_movie_details(query, id=False, file=None):
     try:
@@ -75,20 +91,27 @@ async def get_movie_details(query, id=False, file=None):
                     filtered = movieid
             else:
                 filtered = movieid
-            movieid = list(filter(lambda k: k.get('kind') in ['movie', 'tv series'], filtered))
-            if not movieid:
+            
+            filtered_kind = list(filter(lambda k: k.get('kind') in ['movie', 'tv series'], filtered))
+            if not filtered_kind:
+                logger.info("No matches found for kind 'movie' or 'tv series', falling back to filtered list.")
                 movieid = filtered
+            else:
+                movieid = filtered_kind
+            
             movieid = movieid[0].movieID
         else:
             movieid = query
         movie = ia.get_movie(movieid)
         ia.update(movie, info=['main', 'vote details'])
+        
         if movie.get("original air date"):
             date = movie["original air date"]
         elif movie.get("year"):
             date = movie.get("year")
         else:
             date = "N/A"
+            
         plot = movie.get('plot')
         if plot and len(plot) > 0:
             plot = plot[0]
@@ -96,6 +119,7 @@ async def get_movie_details(query, id=False, file=None):
             plot = movie.get('plot outline')
         if plot and len(plot) > 800:
             plot = plot[:800] + "..."
+            
         poster_url = movie.get('full-size cover url')
         return {
             'title': movie.get('title'),
@@ -121,13 +145,13 @@ async def get_movie_details(query, id=False, file=None):
             'release_date': date,
             'year': movie.get('year'),
             'genres': list_to_str(movie.get("genres")),
-            'poster_url': poster_url,
+            'poster_url': poster_url + "._V1_SX1440.jpg" if poster_url.endswith("@.jpg") else poster_url,
             'plot': plot,
             'rating': str(movie.get("rating", "N/A")),
             'url': f'https://www.imdb.com/title/tt{movieid}'
         }
     except Exception as e:
-        logger.error(f"An error occurred in get_movie_details: {e}")
+        logger.exception(f"An error occurred in get_movie_details: {e}")
         return None
 
 async def get_movie_detailsx(query, id=False, file=None):
@@ -181,16 +205,16 @@ async def get_movie_detailsx(query, id=False, file=None):
             if key and posters.get(key):
                 poster_url = posters[key][0]
                 break
-    details['poster_url'] = poster_url
+    details['poster_url'] = poster_url.replace("/original/", "/w1280/") if poster_url else None
 
     backdrops = data.get('images', {}).get('backdrops', {})
     original_language = data.get('images', {}).get('original_language')
     backdrop_url = None
-    for key in ('en', original_language, 'xx'):
+    for key in ('en', original_language, 'xx' or 'no_lang'):
         if key and backdrops.get(key):
             backdrop_url = backdrops[key][0]
             break
-    details['backdrop_url'] = backdrop_url
+    details['backdrop_url'] = backdrop_url.replace("/original/", "/w1280/") if backdrop_url else None
 
     return details
 
