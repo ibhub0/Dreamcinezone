@@ -32,8 +32,6 @@ logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 logging.getLogger("pymongo").setLevel(logging.WARNING)
 
 botStartTime = time.time()
-ppath = "plugins/*.py"
-files = glob.glob(ppath)
 
 async def dreamxbotz_start():
     print('\n\nInitalizing DreamxBotz')
