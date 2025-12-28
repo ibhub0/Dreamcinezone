@@ -367,7 +367,7 @@ async def start(client, message):
     user = message.from_user.id
     settings = await get_settings(int(grp_id))
     if not files_:
-        pre, file_id = ((base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")).split("_", 1)
+        pre, file_id = ((base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("utf-8")).split("_", 1)
         try:
             cover = None
             if COVERX:
