@@ -230,7 +230,8 @@ async def start(client, message):
         _, grp_id, file_id = data.split("_", 2)
         grp_id = int(grp_id)
     except:
-        _, grp_id, file_id = "", 0, data
+        grp_id = 0
+        file_id = data
 
     # Fetch file details concurrently with user checks
     file_details_task = asyncio.create_task(get_file_details(file_id))
@@ -238,7 +239,7 @@ async def start(client, message):
     if not await db.has_premium_access(message.from_user.id): 
         try:
             btn = []
-            chat = int(data.split("_", 2)[1])
+            chat = grp_id
             settings      = await get_settings(chat)
             fsub_channels = list(dict.fromkeys((settings.get('fsub', []) if settings else [])+ AUTH_CHANNELS)) 
 
