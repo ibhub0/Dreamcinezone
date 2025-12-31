@@ -1,7 +1,7 @@
 FROM python:3.12.2
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends git && \
+    apt-get install -y --no-install-recommends libmediainfo0v5 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
