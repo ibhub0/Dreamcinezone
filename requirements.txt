@@ -9,6 +9,8 @@ bs4
 shortzy
 pytz
 aiohttp
+telegraph
+pymediainfo-pyrofork
 
 # Other tools
 opencv-python-headless==4.8.1.78
@@ -33,5 +35,4 @@ fuzzywuzzy
 python-Levenshtein==0.27.1
 
 # Git-based Packages
-git+https://github.com/DreamXBotz/cinemagoer
-
+https://github.com/DreamXBotz/cinemagoer/archive/master.zip
