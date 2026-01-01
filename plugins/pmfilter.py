@@ -1,4 +1,4 @@
-from utils import get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text
+from utils import get_random_mix_id, get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text
 import tracemalloc
 from fuzzywuzzy import process
 from dreamxbotz.util.file_properties import get_name, get_hash
@@ -1470,10 +1470,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
         try:
+            PIC = f"{random.choice(PICS)}?r={get_random_mix_id()}"
             await client.edit_message_media(
                 query.message.chat.id,
                 query.message.id,
-                InputMediaPhoto(random.choice(PICS))
+                InputMediaPhoto(PIC)
             )
         except Exception as e:
             pass
@@ -1764,12 +1765,13 @@ async def auto_filter(client, msg, spoll=False):
                 message_text = message.text or ""
                 search = message_text.lower()
 
-                stick_id = "CAACAgIAAxkBAAEPhm5o439f8A4sUGO2VcnBFZRRYxAxmQACtCMAAphLKUjeub7NKlvk2TYE"
+                stick_id = "CAACAgUAAxkBAAEQJmRpVii7QoUT_7CyegABteu0unBzkq0AAk4KAAK3UqlVO1V1A3W64x84BA"
                 keyboard = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', callback_data="hiding")]]
                 )
                 try:
-                    m = await message.reply_sticker(sticker=stick_id, reply_markup=keyboard)
+                    # m = await message.reply_sticker(sticker=stick_id, reply_markup=keyboard)
+                    m = await message.reply_sticker(sticker=stick_id)
                 except Exception as e:
                     logger.exception("reply_sticker failed: %s", e)
 
@@ -2087,3 +2089,4 @@ async def advantage_spell_chok(client, message):
         await message.delete()
     except:
         pass
+    

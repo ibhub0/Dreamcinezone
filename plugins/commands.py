@@ -5,6 +5,7 @@ import logging
 import random
 import asyncio
 import string
+import sys
 import pytz
 from .pmfilter import auto_filter 
 from Script import script
@@ -13,11 +14,11 @@ from database.refer import referdb
 from database.config_db import mdb
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, ReplyKeyboardMarkup
 from pyrogram import Client, filters, enums
-from pyrogram.errors import FloodWait, ChatAdminRequired, UserNotParticipant
+from pyrogram.errors import FloodWait, ChatAdminRequired, UserNotParticipant , ChannelInvalid, PeerIdInvalid
 from database.ia_filterdb import Media, Media2, get_file_details, unpack_new_file_id, get_bad_files, save_file
 from database.users_chats_db import db
 from info import *
-from utils import get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, temp, get_readable_time, get_time, generate_settings_text, log_error, clean_filename
+from utils import get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, temp, get_readable_time, get_time, generate_settings_text, log_error, clean_filename, get_random_mix_id
 import time
 
 
@@ -118,15 +119,21 @@ async def start(client, message):
             gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
         else:
             gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
-        m=await message.reply_text("⏳")
+        stick_id = "CAACAgUAAxkBAAEQJmJpViid_0yscWKPfh3RMCY8pIkmXwACMAcAAqzbsFexyKU6FPQAAjgE"
+        try:
+            m = await message.reply_sticker(sticker=stick_id)
+        except Exception as e:
+            logger.exception("reply_sticker failed: %s", e)
         await asyncio.sleep(0.4)
         await m.delete()        
+        PIC = f"{random.choice(PICS)}?r={get_random_mix_id()}"
         await message.reply_photo(
-            photo=random.choice(PICS),
+            photo=PIC,
             caption=script.START_TXT.format(message.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+        await m.delete()
         return
 
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
@@ -150,15 +157,19 @@ async def start(client, message):
             gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
         else:
             gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
-        m=await message.reply_text("⏳")
-        await asyncio.sleep(0.4)
-        await m.delete()        
+        stick_id = "CAACAgUAAxkBAAEQJmJpViid_0yscWKPfh3RMCY8pIkmXwACMAcAAqzbsFexyKU6FPQAAjgE"
+        try:
+            m = await message.reply_sticker(sticker=stick_id)
+        except Exception as e:
+            logger.exception("reply_sticker failed: %s", e)
+        PIC = f"{random.choice(PICS)}?r={get_random_mix_id()}"
         await message.reply_photo(
-            photo=random.choice(PICS),
+            photo=PIC,
             caption=script.START_TXT.format(message.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+        await m.delete()
         return
     if message.command[1].startswith("reff_"):
         try:
