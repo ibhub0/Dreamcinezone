@@ -34,7 +34,7 @@
             --border-normal: rgba(255, 255, 255, 0.1);
         }
 
-        /* Fix Lucide icons fill in Plyr */
+
         .plyr__control .lucide {
             fill: none !important;
         }
@@ -53,7 +53,7 @@
             line-height: 1.6;
         }
 
-        /* Header */
+
         .header {
             position: fixed;
             top: 0;
@@ -113,14 +113,36 @@
             cursor: pointer;
         }
 
-        /* Container */
+
+        .slogan {
+            text-align: center;
+            padding: 6.5rem 1.5rem 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .slogan-text {
+            color: var(--text-secondary);
+        }
+
+        .slogan-highlight {
+            background: linear-gradient(135deg,
+                    var(--accent-rose),
+                    var(--accent-amber));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+
         .container {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 5rem 1.5rem 3rem;
+            padding: 2rem 1.5rem 3rem;
         }
 
-        /* Video Section */
+
         .player-wrapper {
             margin-bottom: 1.5rem;
             border-radius: 16px;
@@ -134,7 +156,7 @@
             position: relative;
             width: 100%;
             padding-bottom: 56.25%;
-            /* 16:9 aspect ratio */
+
             background: #000;
             overflow: hidden;
         }
@@ -148,7 +170,7 @@
             object-fit: contain;
         }
 
-        /* Ensure Plyr wrapper fills container */
+
         .video-container .plyr {
             position: absolute;
             top: 0;
@@ -157,7 +179,7 @@
             height: 100%;
         }
 
-        /* Info Card */
+
         .info-card {
             background: var(--bg-glass);
             backdrop-filter: blur(20px);
@@ -197,7 +219,7 @@
             font-weight: 600;
         }
 
-        /* Actions */
+
         .actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -248,7 +270,7 @@
             height: 18px;
         }
 
-        /* Dropdown */
+
         .dropdown {
             position: relative;
         }
@@ -312,7 +334,7 @@
             color: var(--accent-rose);
         }
 
-        /* Cards Section */
+
         .cards-section {
             margin: 3rem 0;
         }
@@ -415,7 +437,7 @@
             color: var(--accent-rose);
         }
 
-        /* Footer */
+
         .footer {
             text-align: center;
             padding: 2.5rem 1.5rem;
@@ -430,7 +452,7 @@
             font-weight: 600;
         }
 
-        /* Plyr Custom Theme */
+
         .plyr {
             --plyr-color-main: rgb(244, 63, 94);
             border-radius: 0 0 16px 16px;
@@ -467,7 +489,7 @@
             background: var(--accent-rose);
         }
 
-        /* Aspect Ratio Control in Player */
+
         .aspect-dropdown {
             position: absolute;
             bottom: calc(100% + 10px);
@@ -513,7 +535,7 @@
             color: var(--accent-rose);
         }
 
-        /* Mobile */
+
 
         @media (max-width: 768px) {
             .nav {
@@ -552,23 +574,55 @@
                 display: block;
             }
 
+
+            .slogan {
+                padding: 5rem 1rem 0.5rem;
+                font-size: 0.9rem;
+            }
+
             .container {
-                padding: 4.5rem 1rem 2rem;
+                padding: 1rem 1rem 2rem;
             }
 
-            /* Optimize Title */
+
+            .player-wrapper {
+                margin-bottom: 2rem;
+            }
+
+
+            .info-card {
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+
             .file-title {
-                font-size: 1rem;
-                margin-bottom: 0.5rem;
+                font-size: 1.2rem;
+                margin-bottom: 0.75rem;
             }
 
-            /* Optimize Actions/Buttons */
+
+            .cards-section {
+                margin-top: 5rem !important;
+            }
+
+
+            .file-meta {
+                margin-bottom: 1.5rem;
+            }
+
+
+            .cards-section {
+                margin-top: 0rem;
+            }
+
+
             .actions {
-                grid-template-columns: 1fr 1fr;
-                gap: 0.5rem;
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
             }
 
-            /* Fix More Players Button Width on Mobile */
+
             .actions .dropdown {
                 width: 100%;
                 display: flex;
@@ -579,7 +633,7 @@
                 justify-content: center;
             }
 
-            /* Increase Dropdown Menu Width on Mobile */
+
             .actions .dropdown-menu {
                 width: 100%;
                 min-width: 250px;
@@ -594,22 +648,21 @@
 
             .btn {
                 padding: 0.5rem 0.75rem;
-                font-size: 0.75rem;
+                font-size: 0.85rem;
             }
 
-            /* Optimize Audio Warning */
+
             .audio-warning {
-                font-size: 0.7rem;
-                padding: 4px 10px;
-                width: 95%;
-                top: 5px;
+                font-size: 0.6rem;
+                padding: 8px 12px;
+                margin: 1rem 0;
             }
 
             .cards-grid {
                 grid-template-columns: 1fr;
             }
 
-            /* Plyr Mobile Optimization */
+
             .plyr__controls {
                 padding-left: 5px;
                 padding-right: 5px;
@@ -617,58 +670,58 @@
 
             .plyr__control {
                 padding: 5px;
-                /* Reduce padding on buttons */
+
             }
 
-            /* Hide less important controls to give space to seeker */
+
             .plyr__control[data-plyr="pip"],
             .plyr__control[data-plyr="airplay"] {
                 display: none;
             }
 
-            /* Make seeker thicker and easier to touch */
+
             .plyr__progress__container {
                 flex: 1;
-                /* Ensure it takes available space */
+
                 min-width: 100px;
-                /* Minimum width enforcement */
+
             }
 
             .plyr__progress input[type="range"] {
                 height: 12px !important;
-                /* Thicker touch area */
+
                 touch-action: manipulation;
             }
 
-            /* Ensure volume slider doesn't steal too much space but stays visible */
+
             .plyr__volume {
                 display: none !important;
-                /* Hide default volume on mobile entirely, we use custom */
+
             }
 
-            /* On very small screens, hide time to give seeker more space */
+
             @media (max-width: 380px) {
                 .plyr__time {
                     display: none;
                 }
             }
 
-            /* Mobile Popup Adjustments */
+
             .aspect-dropdown {
                 min-width: 120px;
-                /* Smaller width */
+
                 bottom: calc(100% + 5px);
-                /* Close to button */
+
                 max-height: 50vh;
-                /* Prevent going off screen */
+
                 overflow-y: auto;
-                /* Scroll if too tall */
+
             }
 
             .aspect-item {
                 padding: 0.3rem 0.5rem;
                 font-size: 0.65rem;
-                /* Smaller text */
+
             }
 
             .aspect-item svg {
@@ -676,10 +729,10 @@
                 height: 12px;
             }
 
-            /* Volume Popup Mobile */
+
             .volume-popup {
                 height: 100px;
-                /* Slightly shorter */
+
                 width: 28px;
                 bottom: calc(100% + 5px);
             }
@@ -694,13 +747,13 @@
 
             .volume-slider {
                 width: 80px !important;
-                /* Visual height matches container */
+
                 margin-top: 38px !important;
-                /* Re-center */
+
             }
         }
 
-        /* Vertical Volume Slider Styles */
+
         button[data-plyr="volume-custom"] {
             display: flex !important;
             align-items: center;
@@ -710,24 +763,23 @@
         }
 
         .audio-warning {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(245, 158, 11, 0.9);
-            color: #fff;
-            padding: 8px 16px;
+            position: static;
+            background: transparent;
+            color: rgb(251, 191, 36);
+            padding: 12px 16px;
             border-radius: 8px;
             font-size: 0.875rem;
             font-weight: 500;
-            z-index: 2000;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            animation: slideDown 0.3s ease-out;
-            max-width: 90%;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 6px;
+            margin: 1.5rem 0;
             text-align: center;
+        }
+
+        .audio-warning svg {
+            margin-top: 3px;
         }
 
         .audio-warning button {
@@ -787,7 +839,7 @@
             -webkit-appearance: none;
             appearance: none;
             width: 100px !important;
-            /* Ensure it doesn't shrink */
+
             flex-shrink: 0;
             height: 4px !important;
             background: rgba(255, 255, 255, 0.2);
@@ -798,7 +850,7 @@
             cursor: pointer;
             margin-top: 48px !important;
             padding: 0 !important;
-            /* Offset for rotation */
+
         }
 
         .volume-slider::-webkit-slider-thumb {
@@ -826,7 +878,7 @@
             white-space: nowrap;
         }
 
-        /* Hide default Plyr volume control generally if we use custom */
+
         .plyr__volume {
             display: none !important;
         }
@@ -835,7 +887,7 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        /* Scrollbar */
+
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -861,7 +913,7 @@
 </head>
 
 <body>
-    <!-- Header -->
+
     <header class="header">
         <div class="header-content">
             <a href="https://t.me/dreamxbotz" class="logo"> DreamXbotz </a>
@@ -882,9 +934,14 @@
         </div>
     </header>
 
-    <!-- Main Container -->
+
+    <div class="slogan">
+        <span class="slogan-text">Stream Effortlessly,</span> <span class="slogan-highlight">Anytime, Anywhere</span>
+    </div>
+
+
     <div class="container">
-        <!-- Video Player -->
+
         <section id="video-section" class="fade-in">
             <div class="player-wrapper">
                 <div class="video-container">
@@ -895,7 +952,7 @@
                 </div>
             </div>
 
-            <!-- Info Card -->
+
             <div class="info-card">
                 <h1 class="file-title">{{file_name}}</h1>
 
@@ -969,7 +1026,7 @@
             </div>
         </section>
 
-        <!-- Explore Section -->
+
         <section id="explore" class="cards-section">
             <div class="section-header">
                 <h2 class="section-title">Explore Our Universe</h2>
@@ -1073,21 +1130,20 @@
         </section>
     </div>
 
-    <!-- Footer -->
+
     <footer class="footer">
         <p>
-            &copy; 2025 <a href="https://t.me/dreamxbotz">DreamXbotz</a>. All Rights
+            &copy; 2026 <a href="https://t.me/dreamxbotz">DreamXbotz</a>. All Rights
             Reserved.
         </p>
     </footer>
 
-    <!-- Scripts -->
+
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/Bharathboy/utils@main/jsmkv-polyfill.js"></script>
 
     <script>
-        // Wait for Plyr to load
         function initPlayer() {
             const video = document.querySelector("#player");
             if (!video) {
@@ -1097,7 +1153,6 @@
 
             const source = video.querySelector("source");
             const url = source?.src || "";
-            // Fix: Clean URL to remove query params for extension check
             const cleanUrl = url.split("?")[0];
             const ext = cleanUrl.split(".").pop()?.toLowerCase() || "";
 
@@ -1136,8 +1191,6 @@
             });
 
             window.plyrPlayer = player;
-
-            // Wait a bit for Plyr to fully render controls
             setTimeout(() => {
                 addCustomControls();
             }, 200);
@@ -1149,15 +1202,11 @@
                 console.error("Plyr controls not found");
                 return;
             }
-
-            // Get fullscreen button FIRST (needed for insertBefore)
             const fullscreen = controls.querySelector('[data-plyr="fullscreen"]');
             if (!fullscreen) {
                 console.error("Fullscreen button not found");
                 return;
             }
-
-            // Add custom speed control button
             const speedBtn = document.createElement("button");
             speedBtn.className = "plyr__controls__item plyr__control";
             speedBtn.type = "button";
@@ -1198,19 +1247,15 @@
             controls.insertBefore(speedBtn, fullscreen);
             speedBtn.appendChild(speedDropdown);
             lucide.createIcons({ root: speedDropdown });
-
-            // Toggle speed dropdown
             speedBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 speedDropdown.classList.toggle("active");
 
-                // Close volume popup
                 const volumePopups = document.querySelectorAll(
                     ".volume-popup.active"
                 );
                 volumePopups.forEach((p) => p.classList.remove("active"));
 
-                // Close aspect dropdown if open
                 const aspectDropdowns = document.querySelectorAll(
                     ".aspect-dropdown.active"
                 );
@@ -1221,7 +1266,6 @@
                 });
             });
 
-            // Handle speed changes
             speedDropdown.querySelectorAll(".aspect-item").forEach((item) => {
                 item.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -1249,15 +1293,12 @@
                     speedDropdown.classList.remove("active");
                 });
             });
-
-            // Close speed dropdown when clicking outside
             document.addEventListener("click", (e) => {
                 if (!speedBtn.contains(e.target)) {
                     speedDropdown.classList.remove("active");
                 }
             });
 
-            // Add aspect ratio button
             const aspectBtn = document.createElement("button");
             aspectBtn.className = "plyr__controls__item plyr__control";
             aspectBtn.type = "button";
@@ -1301,12 +1342,10 @@
             aspectBtn.appendChild(dropdown);
             lucide.createIcons({ root: dropdown });
 
-            // --- Custom Volume Control (Vertical) ---
             const volumeBtn = document.createElement("button");
             volumeBtn.className = "plyr__controls__item plyr__control";
             volumeBtn.type = "button";
             volumeBtn.setAttribute("data-plyr", "volume-custom");
-            // position: relative handled by CSS now for cleaner separation
             volumeBtn.innerHTML = `
                 <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -1327,11 +1366,6 @@
 
             volumeBtn.appendChild(volumePopup);
 
-            // Insert Volume before Speed button ideally, or where default volume was
-            // Since we hid default volume, let's place it early in controls, but we have 'speedBtn' which is before fullscreen.
-            // Let's place it BEFORE speed button if possible, or just before fullscreen to group them.
-            // Actually standard player order: Play | Time | Progress | Volume | Speed | ...
-            // We'll put it before Speed.
             controls.insertBefore(volumeBtn, speedBtn);
 
             const video = document.querySelector("#player");
@@ -1354,35 +1388,29 @@
                 }
             }
 
-            // Initial state
             if (video) {
                 updateVolumeUI(video.volume, video.muted);
             }
 
-            // Events - Click to toggle
             volumeBtn.addEventListener("click", (e) => {
-                // Prevent closing if clicking slider itself
                 if (e.target === volSlider || e.target.closest(".volume-popup"))
                     return;
 
                 e.stopPropagation();
                 volumePopup.classList.toggle("active");
 
-                // Close other dropdowns
                 const otherDropdowns = document.querySelectorAll(
                     ".aspect-dropdown.active"
                 );
                 otherDropdowns.forEach((d) => d.classList.remove("active"));
             });
 
-            // Close on outside click
             document.addEventListener("click", (e) => {
                 if (!volumeBtn.contains(e.target)) {
                     volumePopup.classList.remove("active");
                 }
             });
 
-            // Interaction with slider
             if (volSlider) {
                 volSlider.addEventListener("input", (e) => {
                     const val = parseFloat(e.target.value);
@@ -1396,7 +1424,6 @@
                 volSlider.addEventListener("click", (e) => e.stopPropagation());
             }
 
-            // Sync with external volume changes
             if (video) {
                 video.addEventListener("volumechange", () => {
                     updateVolumeUI(video.volume, video.muted);
@@ -1406,13 +1433,11 @@
                 e.stopPropagation();
                 dropdown.classList.toggle("active");
 
-                // Close volume popup
                 const volumePopups = document.querySelectorAll(
                     ".volume-popup.active"
                 );
                 volumePopups.forEach((p) => p.classList.remove("active"));
 
-                // Close other dropdowns (like Speed)
                 const otherDropdowns = document.querySelectorAll(
                     ".aspect-dropdown.active"
                 );
@@ -1421,7 +1446,6 @@
                 });
             });
 
-            // Handle aspect ratio changes
             dropdown.querySelectorAll(".aspect-item").forEach((item) => {
                 item.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -1430,7 +1454,6 @@
                     const container = document.querySelector(".video-container");
 
                     if (video && container) {
-                        // Reset styles first
                         video.style.width = "100%";
                         video.style.height = "100%";
                         video.style.top = "0";
@@ -1438,36 +1461,27 @@
                         video.style.transform = "none";
 
                         if (aspect === "cover") {
-                            // Fill screen mode - crop video to fill container
                             video.style.objectFit = "cover";
                             video.style.objectPosition = "center";
                         } else if (aspect === "original") {
-                            // Original mode - just contain within 16:9 box (let browser handle native aspect)
                             video.style.objectFit = "contain";
                             video.style.objectPosition = "center";
                         } else {
-                            // Aspect ratio presets - calculate dimensions to fit within 16:9 container
                             const targetRatio = parseFloat(aspect);
-                            const containerRatio = 16 / 9; // Fixed container ratio
+                            const containerRatio = 16 / 9;
 
                             if (targetRatio < containerRatio) {
-                                // Video is narrower than container (e.g. 4:3) - Fit height, adjust width
-                                // We want the video to be tall enough to fit height (100%)
-                                // And width should be proportional: (TargetRatio / ContainerRatio) * 100%
                                 const widthPercent = (targetRatio / containerRatio) * 100;
                                 video.style.width = `${widthPercent}%`;
                                 video.style.height = "100%";
-                                video.style.left = `${(100 - widthPercent) / 2}%`; // Center horizontally
-                                video.style.objectFit = "fill"; // Fill the calculated box
+                                video.style.left = `${(100 - widthPercent) / 2}%`;
+                                video.style.objectFit = "fill";
                             } else {
-                                // Video is wider than container (e.g. 21:9) - Fit width, adjust height
-                                // Width is 100%
-                                // Height should be proportional: (ContainerRatio / TargetRatio) * 100%
                                 const heightPercent = (containerRatio / targetRatio) * 100;
                                 video.style.width = "100%";
                                 video.style.height = `${heightPercent}%`;
-                                video.style.top = `${(100 - heightPercent) / 2}%`; // Center vertically
-                                video.style.objectFit = "fill"; // Fill the calculated box
+                                video.style.top = `${(100 - heightPercent) / 2}%`;
+                                video.style.objectFit = "fill";
                             }
                         }
                     }
@@ -1491,7 +1505,6 @@
                 });
             });
 
-            // Close dropdown when clicking outside
             document.addEventListener("click", (e) => {
                 if (!aspectBtn.contains(e.target)) {
                     dropdown.classList.remove("active");
@@ -1515,14 +1528,11 @@
                 initPlyr(video);
             }
         }
-
-        // Dropdown for more players
         function toggleDropdown() {
             const dropdown = document.getElementById("players-dropdown");
             dropdown.classList.toggle("active");
         }
 
-        // Player functions
         function blazeDownload() {
             const a = document.createElement("a");
             a.href = "{{file_url}}";
@@ -1564,7 +1574,6 @@
                 "intent:{{file_url}}#Intent;package=com.hdplayer;end";
         }
 
-        // Close all dropdowns when clicking outside
         document.addEventListener("click", (e) => {
             if (!e.target.closest(".dropdown")) {
                 const playersDropdown = document.getElementById("players-dropdown");
@@ -1576,42 +1585,63 @@
 
         function checkAudioSupport() {
             const video = document.createElement("video");
-            // Check for EC-3 (EAC3) support - "" means not supported
             if (video.canPlayType('audio/mp4; codecs="ec-3"') === "") {
-                const container = document.querySelector(".player-wrapper");
-                if (container && !document.querySelector(".audio-warning")) {
+                const videoSection = document.querySelector("#video-section");
+                if (videoSection && !document.querySelector(".audio-warning")) {
                     const warning = document.createElement("div");
                     warning.className = "audio-warning";
                     warning.innerHTML = `
-                        <span>⚠️ Browser does not support EAC3 audio. If no sound, please use External Players.</span>
-                        <button onclick="this.parentElement.remove()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>Browser does not support EAC3 audio. If no sound, please use External Players.</span>
                      `;
-                    container.appendChild(warning);
-
-                    // Auto-dismiss after 5 seconds
-                    setTimeout(() => {
-                        if (warning && warning.parentElement) {
-                            warning.style.opacity = "0";
-                            warning.style.transition = "opacity 0.5s";
-                            setTimeout(() => warning.remove(), 500);
-                        }
-                    }, 5000);
+                    videoSection.appendChild(warning);
                 }
             }
         }
 
-        // Initialize when DOM is ready
+        function cleanFileName() {
+            const fileTitle = document.querySelector(".file-title");
+            if (fileTitle) {
+                let cleanedName = fileTitle.textContent;
+                cleanedName = cleanedName
+                    .replace(/\./g, " ")
+                    .replace(/\[/g, " ")
+                    .replace(/\]/g, " ")
+                    .replace(/\{/g, " ")
+                    .replace(/\}/g, " ")
+                    .replace(/_/g, " ")
+                    .replace(/\.mkv/gi, " ")
+                    .replace(/\.mp4/gi, " ")
+                    .replace(/mkv/gi, " ")
+                    .replace(/mp4/gi, " ")
+                    .replace(/\s+/g, " ")
+                    .trim();
+                fileTitle.textContent = cleanedName;
+            }
+        }
+
+        function scrollToVideoSection() {
+            if (window.innerWidth > 768) {
+                const videoSection = document.querySelector("#video-section");
+                if (videoSection) {
+                    setTimeout(() => {
+                        videoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            }
+        }
+
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", () => {
+                cleanFileName();
+                scrollToVideoSection();
                 initPlayer();
                 checkAudioSupport();
 
-                // Mobile Menu Logic
                 const mobileMenuBtn = document.querySelector(".mobile-menu");
                 const nav = document.querySelector(".nav");
 
@@ -1621,14 +1651,12 @@
                         nav.classList.toggle("active");
                     });
 
-                    // Close nav when clicking a link
                     nav.querySelectorAll("a").forEach((link) => {
                         link.addEventListener("click", () => {
                             nav.classList.remove("active");
                         });
                     });
 
-                    // Close on outside click
                     document.addEventListener("click", (e) => {
                         if (
                             !nav.contains(e.target) &&
@@ -1640,9 +1668,10 @@
                 }
             });
         } else {
+            cleanFileName();
+            scrollToVideoSection();
             initPlayer();
             checkAudioSupport();
-            // Duplicate logic for already loaded state
             const mobileMenuBtn = document.querySelector(".mobile-menu");
             const nav = document.querySelector(".nav");
             if (mobileMenuBtn && nav) {
