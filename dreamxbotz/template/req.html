@@ -1541,37 +1541,41 @@
         }
 
         function vlc_player() {
-            window.location.href = "vlc://{{file_url}}";
+            // VLC on Android supports full https URLs
+            window.location.href =
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end";
         }
 
         function mx_player() {
             window.location.href =
-                "intent:{{file_url}}#Intent;package=com.mxtech.videoplayer.ad;end";
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;end";
         }
 
         function mx_playerpro() {
             window.location.href =
-                "intent:{{file_url}}#Intent;package=com.mxtech.videoplayer.pro;end";
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.pro;end";
         }
 
         function playit_player() {
+            // PLAYit works best with its native deep-link
             window.location.href =
-                "intent:{{file_url}}#Intent;package=com.playit.videoplayer;end";
+                "playit://playerv2/video?url={{file_url}}";
         }
 
         function km_player() {
             window.location.href =
-                "intent:{{file_url}}#Intent;package=com.kmplayer;end";
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.kmplayer;end";
         }
 
         function s_player() {
             window.location.href =
-                "intent:{{file_url}}#Intent;package=com.young.splayer;end";
+                "intent:{{file_url}}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end";
         }
 
         function hd_player() {
+            // Correct HD Player package
             window.location.href =
-                "intent:{{file_url}}#Intent;package=com.hdplayer;end";
+                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=uplayer.video.player;end";
         }
 
         document.addEventListener("click", (e) => {
