@@ -434,7 +434,6 @@ async def start(client, message):
         if f_caption is None:
             f_caption = clean_filename(files.file_name)
         btn = await stream_buttons(message.from_user.id, file_id)
-        print(f"file id is {file_id}")
         msg = await client.send_cached_media(
             chat_id=message.from_user.id,
             file_id=file_id,
