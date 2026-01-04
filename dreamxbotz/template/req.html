@@ -1540,10 +1540,18 @@
             a.click();
         }
 
-        function vlc_player() {
-            // VLC on Android supports full https URLs
-            window.location.href =
-                "intent:{{file_url}}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end";
+        function vlc_player(event) {
+            const url = "{{file_url}}";
+            const stripped = url.replace(/^https?:\/\//, "");
+
+            // 1️⃣ Try fast VLC deep-link first (works on some devices)
+            window.location.href = `vlc://${stripped}`;
+
+            // 2️⃣ Fallback to Android Intent (works everywhere)
+            setTimeout(() => {
+                window.location.href =
+                    "intent:${url}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end";
+            }, 500);
         }
 
         function mx_player() {
