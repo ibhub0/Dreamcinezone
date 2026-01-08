@@ -197,7 +197,7 @@ async def extract_data_handler(client: Client, query: CallbackQuery):
                 author_name="DreamxBotz"
             )
         except requests.exceptions.ConnectionError:
-            await query.answer("⚠️ Telegraph service busy Please try later", show_alert=True)
+            await query.answer("⚠️ Telegraph service is busy. Please try again later.", show_alert=True)
             return
         telegraph_url = response["url"]
 
