@@ -56,36 +56,52 @@ class temp(object):
     IMDB_CAP = {}
     VERIFICATIONS = {}
     TEMP_INVITE_LINKS = {}
+    REQ_LINKS = {}
+
 
 async def is_req_subscribed(bot, user_id, rqfsub_channels):
     btn = []
-    for ch_id in rqfsub_channels:
+
+    async def check_req_channel(ch_id):
         if await db.has_joined_channel(user_id, ch_id):
-            continue
+            return None
         try:
             member = await bot.get_chat_member(ch_id, user_id)
             if member.status != enums.ChatMemberStatus.BANNED:
                 await db.add_join_req(user_id, ch_id)
-                continue
+                return None
         except UserNotParticipant:
             pass
         except Exception as e:
             logger.error(f"Error checking membership in {ch_id}: {e}")
 
         try:
-            chat   = await bot.get_chat(ch_id)
-            invite = await bot.create_chat_invite_link(
-                ch_id,
-                creates_join_request=True
-            )
-            btn.append([InlineKeyboardButton(f"⛔️ Join {chat.title}", url=invite.invite_link)])
+            chat = await bot.get_chat(ch_id)
+            if ch_id in temp.REQ_LINKS:
+                invite_link = temp.REQ_LINKS[ch_id]
+            else:
+                invite = await bot.create_chat_invite_link(
+                    ch_id,
+                    creates_join_request=True
+                )
+                invite_link = invite.invite_link
+                temp.REQ_LINKS[ch_id] = invite_link
+
+            return [InlineKeyboardButton(f"⛔️ Join {chat.title}", url=invite_link)]
         except ChatAdminRequired:
             logger.warning(f"Bot not admin in {ch_id}")
         except Exception as e:
             logger.warning(f"Invite link error for {ch_id}: {e}")
-            
-    return btn
+        return None
 
+    tasks = [check_req_channel(ch_id) for ch_id in rqfsub_channels]
+    results = await asyncio.gather(*tasks)
+
+    for res in results:
+        if res:
+            btn.append(res)
+
+    return btn
 
 async def is_subscribed(bot, user_id, fsub_channels):
     btn = []
