@@ -44,6 +44,7 @@ def format_track(lang: str | None, title: str | None) -> str:
 
 @Client.on_callback_query(filters.regex(r"^extract_data"), group=2)
 async def extract_data_handler(client: Client, query: CallbackQuery):
+    await query.answer("Fetching Details...", show_alert=False)
     _, file_id = query.data.split(":")
 
     current_markup = query.message.reply_markup
