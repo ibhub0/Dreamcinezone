@@ -44,7 +44,11 @@ def format_track(lang: str | None, title: str | None) -> str:
 
 @Client.on_callback_query(filters.regex(r"^extract_data"), group=2)
 async def extract_data_handler(client: Client, query: CallbackQuery):
-    await query.answer("Fetching Details...", show_alert=False)
+    try:
+        await query.answer("Fetching Details...", show_alert=False)
+    except Exception:
+        pass
+
     _, file_id = query.data.split(":")
 
     current_markup = query.message.reply_markup
@@ -75,7 +79,7 @@ async def extract_data_handler(client: Client, query: CallbackQuery):
     try:
         files_ = await get_file_details(file_id)
         if not files_:
-            await query.answer("File not found in DB.", show_alert=True)
+            await query.message.reply_text("❌ File not found in DB.", quote=True)
             return
 
         log_msg = await client.send_cached_media(
@@ -197,9 +201,10 @@ async def extract_data_handler(client: Client, query: CallbackQuery):
                 html_content=page_content,
                 author_name="DreamxBotz"
             )
-        except requests.exceptions.ConnectionError:
-            await query.answer("⚠️ Telegraph service is busy. Please try again later.", show_alert=True)
+        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+            await query.message.reply_text("⚠️ Telegraph is busy. Try again later.", quote=True)
             return
+
         telegraph_url = response["url"]
 
         success_keyboard = []
@@ -221,7 +226,7 @@ async def extract_data_handler(client: Client, query: CallbackQuery):
 
     except Exception as e:
         logger.exception(e)
-        await query.answer(f"Error: {e}", show_alert=True)
+        await query.message.reply_text(f"Error: {e}", quote=True)
 
     finally:
         if os.path.exists(temp_path):
