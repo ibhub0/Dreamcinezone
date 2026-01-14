@@ -1473,7 +1473,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
         try:
-            PIC = f"{random.choice(PICS)}?r={get_random_mix_id()}"
+            try:
+                PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
+            except Exception:
+                PIC = random.choice(PICS)
             await client.edit_message_media(
                 query.message.chat.id,
                 query.message.id,

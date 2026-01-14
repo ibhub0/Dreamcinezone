@@ -124,8 +124,11 @@ async def start(client, message):
             elif curr_time < 21:
                 gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
             else:
-                gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"      
-            PIC = f"{random.choice(PICS)}?r={get_random_mix_id()}"
+                gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
+            try:      
+                PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
+            except Exception:
+                PIC = random.choice(PICS)
             await message.reply_photo(
                 photo=PIC,
                 caption=script.START_TXT.format(message.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
@@ -155,7 +158,10 @@ async def start(client, message):
                 gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
             else:
                 gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
-            PIC = f"{random.choice(PICS)}?r={get_random_mix_id()}"
+            try:
+                PIC = f"{random.choice(PICS_URL)}?r={get_random_mix_id()}"
+            except Exception:
+                PIC = random.choice(PICS)
             await message.reply_photo(
                 photo=PIC,
                 caption=script.START_TXT.format(message.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
