@@ -4,7 +4,7 @@ import logging
 import random
 import string
 from info import *
-from imdb import Cinemagoer 
+from imdbkit import IMDBKit 
 import asyncio
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid, ChatAdminRequired, MessageNotModified
@@ -31,7 +31,7 @@ BTN_URL_REGEX = re.compile(
 )
 
 
-imdb = Cinemagoer() 
+imdb = IMDBKit() 
 BANNED = {}
 SMART_OPEN = '“'
 SMART_CLOSE = '”'
@@ -227,7 +227,119 @@ async def add_name_to_db(filename):
     
     return await db.add_name(filename) 
 
+
+def listx_to_str(k):
+    if k is None or k == "":
+        return "N/A"
+    
+    # Handle non-iterable types first
+    if not hasattr(k, '__iter__') or isinstance(k, (str, int, float)):
+        return str(k)
+    
+    result = []
+    for elem in k:
+        if elem and str(elem).strip():
+            result.append(str(elem).strip())
+    
+    if MAX_LIST_ELM and len(result) > MAX_LIST_ELM:
+        result = result[:int(MAX_LIST_ELM)]
+    
+    return ', '.join(result) if result else "N/A"
+    
 async def get_poster(query, bulk=False, id=False, file=None):
+    if not id:
+        query = (query.strip()).lower()
+        title = query
+        year_val = None
+        
+        year_list = re.findall(r'[1-2]\d{3}$', query, re.IGNORECASE)
+        if year_list:
+            year_val = year_list[0]
+            title = (query.replace(year_val, "")).strip()
+        elif file is not None:
+            year_list = re.findall(r'[1-2]\d{3}', file, re.IGNORECASE)
+            if year_list:
+                year_val = year_list[0]
+        
+        search_result = await asyncio.to_thread(imdb.search_movie, title.lower())
+        if not search_result or not search_result.titles:
+            return None
+        
+        movie_list = search_result.titles
+        
+        if year_val:
+            filtered = [m for m in movie_list if m.year and str(m.year) == str(year_val)]
+            if not filtered:
+                filtered = movie_list
+        else:
+            filtered = movie_list
+            
+        kind_filter = ['movie', 'tv series', 'tvSeries', 'tvMiniSeries', 'tvMovie']
+        filtered_kind = [m for m in filtered if m.kind and m.kind in kind_filter]
+        
+        if not filtered_kind:
+            filtered_kind = filtered
+        
+        if bulk:
+            return filtered_kind
+            
+        movie_brief = filtered_kind[0]
+        movieid_str = movie_brief.imdb_id 
+    else:
+        movieid_str = query
+
+    movie = await asyncio.to_thread(imdb.get_movie, movieid_str)
+    if not movie:
+        return None
+
+    if movie.release_date:
+        date = movie.release_date
+    elif movie.year:
+        date = str(movie.year)
+    else:
+        date = "N/A"
+        
+    plot = movie.plot or ""
+    if plot and len(plot) > 800:
+        plot = plot[0:800] + "..."
+        
+    return {
+        'title': movie.title,
+        'votes': movie.votes,
+        "aka": listx_to_str(movie.title_akas),
+        "seasons": (
+            len(movie.info_series.display_seasons)
+            if getattr(movie, "info_series", None)
+            and getattr(movie.info_series, "display_seasons", None)
+            else "N/A"
+        ),
+        "box_office": movie.worldwide_gross,
+        'localized_title': movie.title_localized,
+        'kind': movie.kind,
+        "imdb_id": f"tt{movie.imdb_id}",
+        "cast": listx_to_str(movie.stars),
+        "runtime": listx_to_str(movie.duration),
+        "countries": listx_to_str(movie.countries),
+        "certificates": listx_to_str(movie.certificates),
+        "languages": listx_to_str(movie.languages),
+        "director": listx_to_str(movie.directors),
+        "writer": listx_to_str([p.name for p in movie.writers]),
+        "producer": listx_to_str([p.name for p in movie.producers]),
+        "composer": listx_to_str([p.name for p in movie.composers]),
+        "cinematographer": listx_to_str([p.name for p in movie.cinematographers]),
+        "music_team": listx_to_str([p.name for p in movie.music_team]),
+        "distributors": listx_to_str([c.name for c in movie.distributors]),        
+        'release_date': date,
+        'year': movie.year,
+        'genres': listx_to_str(movie.genres),
+        'poster': movie.cover_url,
+        'plot': plot,
+        'rating': str(movie.rating),
+        'url': movie.url or f'https://www.imdb.com/title/tt{movie.imdb_id}'
+    }
+    
+#Remove Nahi Kiya Hu.....Agar Tujha Remove Karna Hai To Kar Dena
+async def old_get_poster(query, bulk=False, id=False, file=None):
     if not id:
         query = (query.strip()).lower()
         title = query
