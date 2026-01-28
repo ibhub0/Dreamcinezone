@@ -302,7 +302,10 @@ async def get_poster(query, bulk=False, id=False, file=None):
         
     plot = movie.plot[0] if isinstance(movie.plot, list) else movie.plot or ""
     if len(plot) > 800:
-        plot = plot[:800] + "..."     
+        plot = plot[:800] + "..."
+    imdb_id = movie.imdb_id
+    if not imdb_id.startswith("tt"):
+        imdb_id = f"tt{imdb_id}"
     return {
         'title': movie.title,
         'votes': movie.votes,
@@ -316,7 +319,7 @@ async def get_poster(query, bulk=False, id=False, file=None):
         "box_office": movie.worldwide_gross,
         'localized_title': movie.title_localized,
         'kind': movie.kind,
-        "imdb_id": f"tt{movie.imdb_id}",
+        "imdb_id": imdb_id,
         "cast": listx_to_str(movie.stars),
         "runtime": listx_to_str(movie.duration),
         "countries": listx_to_str(movie.countries),
@@ -335,7 +338,7 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'poster': movie.cover_url,
         'plot': plot,
         'rating': str(movie.rating),
-        'url': movie.url or f'https://www.imdb.com/title/tt{movie.imdb_id}'
+        "url": movie.url or f"https://www.imdb.com/title/{imdb_id}"
     }
     
 #Remove Nahi Kiya Hu.....Agar Tujha Remove Karna Hai To Kar Dena
