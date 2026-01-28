@@ -265,7 +265,7 @@ async def get_poster(query, bulk=False, id=False, file=None):
         if not search_result or not search_result.titles:
             return None
         
-        movie_list = search_result.titles
+        movie_list = search_result.titles[:MAX_LIST_ELM]
         
         if year_val:
             filtered = [m for m in movie_list if m.year and str(m.year) == str(year_val)]
@@ -281,8 +281,9 @@ async def get_poster(query, bulk=False, id=False, file=None):
             filtered_kind = filtered
         
         if bulk:
-            return filtered_kind
-            
+            return filtered_kind[:MAX_LIST_ELM]
+        if not filtered_kind:
+            return None   
         movie_brief = filtered_kind[0]
         movieid_str = movie_brief.imdb_id 
     else:
@@ -299,10 +300,9 @@ async def get_poster(query, bulk=False, id=False, file=None):
     else:
         date = "N/A"
         
-    plot = movie.plot or ""
-    if plot and len(plot) > 800:
-        plot = plot[0:800] + "..."
-        
+    plot = movie.plot[0] if isinstance(movie.plot, list) else movie.plot or ""
+    if len(plot) > 800:
+        plot = plot[:800] + "..."     
     return {
         'title': movie.title,
         'votes': movie.votes,
