@@ -1756,10 +1756,7 @@ async def auto_filter(client, msg, spoll=False):
         except Exception:
             # ignore scheduling errors
             pass
-
-    # initialize to avoid NameError if reply_sticker fails
     m = None
-
     try:
         if not spoll:
             message = msg
@@ -1770,17 +1767,7 @@ async def auto_filter(client, msg, spoll=False):
             if len(message.text) < 100:
                 message_text = message.text or ""
                 search = message_text.lower()
-
-                stick_id = "CAACAgUAAxkBAAEQJmRpVii7QoUT_7CyegABteu0unBzkq0AAk4KAAK3UqlVO1V1A3W64x84BA"
-                keyboard = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', callback_data="hiding")]]
-                )
-                try:
-                    # m = await message.reply_sticker(sticker=stick_id, reply_markup=keyboard)
-                    m = await message.reply_sticker(sticker=stick_id)
-                except Exception as e:
-                    logger.exception("reply_sticker failed: %s", e)
-
+                m = await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
                 find = search.split(" ")
                 search = ""
                 removes = ["in", "upload", "series", "full",
@@ -1794,15 +1781,12 @@ async def auto_filter(client, msg, spoll=False):
                 search = search.replace("-", " ")
                 search = re.sub(r"[:']", "", search)
                 search = re.sub(r"\s+", " ", search).strip()
-
                 files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
-
                 settings = await get_settings(message.chat.id)
                 if not files:
                     if settings.get("spell_check"):
                         ai_sts = await m.edit('🤖 ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ, ᴀɪ ɪꜱ ᴄʜᴇᴄᴋɪɴɢ ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ...')
                         is_misspelled = await ai_spell_check(chat_id=message.chat.id, wrong_name=search)
-
                         if is_misspelled:
                             await ai_sts.edit(f'✅ Aɪ Sᴜɢɢᴇsᴛᴇᴅ: <code>{is_misspelled}</code>\n🔍 Searching for it...')
                             message.text = is_misspelled
@@ -1822,18 +1806,15 @@ async def auto_filter(client, msg, spoll=False):
             else:
                 return
         else:
-            # spoll branch
             message = msg.message.reply_to_message
             search, files, offset, total_results = spoll
             m = await message.reply_text(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', reply_to_message_id=message.id)
             settings = await get_settings(message.chat.id)
             await msg.message.delete()
-
         key = f"{message.chat.id}-{message.id}"
         FRESH[key] = search
         temp.GETALL[key] = files
         temp.SHORT[message.from_user.id] = message.chat.id
-
         if settings.get('button'):
             btn = [
                 [
@@ -1913,18 +1894,15 @@ async def auto_filter(client, msg, spoll=False):
             imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_POSTER else await get_poster(search, file=(files[0]).file_name)
         else:
             imdb = None
-
         cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
         time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
             timedelta(hours=curr_time.hour, minutes=curr_time.minute,
                       seconds=(curr_time.second+(curr_time.microsecond/1000000)))
         remaining_seconds = "{:.2f}".format(time_difference.total_seconds())
-
         TEMPLATE = script.IMDB_TEMPLATE_TXT
         settings = await get_settings(message.chat.id)
         if settings.get('template'):
             TEMPLATE = settings['template']
-
         if imdb:
             cap = TEMPLATE.format(
                 query=search,
@@ -1979,7 +1957,6 @@ async def auto_filter(client, msg, spoll=False):
 
                     for idx, file in enumerate(files, start=1):
                         cap += f"<b>\n{idx}. <a href='https://telegram.me/{temp.U_NAME}?start=file_{message.chat.id}_{file.file_id}'>[{get_size(file.file_size)}] {clean_filename(file.file_name)}\n</a></b>"
-
         sent = None
         try:
             if imdb and imdb.get('poster'):
@@ -2007,7 +1984,6 @@ async def auto_filter(client, msg, spoll=False):
         except Exception as e:
             logger.exception("Failed to send result: %s", e)
             return
-
         try:
             if settings.get('auto_delete'):
                 asyncio.create_task(_schedule_delete(sent, message, DELETE_TIME))
@@ -2018,7 +1994,6 @@ async def auto_filter(client, msg, spoll=False):
                 pass
             asyncio.create_task(_schedule_delete(sent, message, DELETE_TIME))
         return
-
     except Exception as e:
         logger.exception(e)
         return
@@ -2040,7 +2015,6 @@ async def ai_spell_check(chat_id, wrong_name):
         if files:
             return movie
         movie_list.remove(movie)
-
 
 async def advantage_spell_chok(client, message):
     mv_id = message.id
