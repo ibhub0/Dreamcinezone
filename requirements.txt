@@ -36,4 +36,4 @@ python-Levenshtein==0.27.1
 
 # Git-based Packages
 https://github.com/NBBotz/IMDBKit/archive/refs/heads/main.zip
-https://github.com/DreamXBotz/cinemagoer/archive/master.zip
+git+https://github.com/DreamXBotz/cinemagoer
