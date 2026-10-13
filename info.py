@@ -1,5 +1,6 @@
 import re
 import os
+import pytz
 from os import environ, getenv
 from Script import script
 
@@ -28,6 +29,8 @@ BOT_TOKEN = environ.get('BOT_TOKEN', "")    # Bot token from @BotFather
 # ============================
 # Bot Settings Configuration
 # ============================
+TIMEZONE = environ.get('TIMEZONE', 'Asia/Kolkata')
+TZ = pytz.timezone(TIMEZONE)
 CACHE_TIME = int(environ.get('CACHE_TIME', 300))    # Cache time in seconds (default: 5 minutes)
 USE_CAPTION_FILTER = is_enabled(environ.get('USE_CAPTION_FILTER', "True"), True)  # Use caption filter for search results (default: True)
 INDEX_CAPTION = is_enabled(environ.get('SAVE_CAPTION', "True"), True) # Save caption db when idexing make it False if you dont use USE_CAPTION_FILTER for search results (default: True)
@@ -202,7 +205,6 @@ BAD_WORDS = {
     "tg",
     "original"
 } # Set of bad words to filter out
-   
 
 # ============================
 # Server & Web Configuration

@@ -1,5 +1,5 @@
 import logging
-from utils import get_random_mix_id, get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text, get_settings_text
+from utils import LimitedDict, get_random_mix_id, get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text, get_settings_text
 from rapidfuzz import process
 from dreamxbotz.util.file_properties import get_name, get_hash
 from urllib.parse import quote_plus
@@ -14,7 +14,8 @@ from info import (
     EMOJI_MODE, GRP_LNK, LANDSCAPE_POSTER, LANGUAGES, LOG_CHANNEL, MAX_B_TN, MSG_ALRT,
     MULTIPLE_DB, NO_RESULTS_MSG, OWNER_LNK, OWNER_UPI_ID, PICS, PICS_URL, QR_CODE, QUALITIES,
     REACTIONS, REQST_CHANNEL, SEASONS, STAR_PREMIUM_PLANS, SUBSCRIPTION, SUPPORT_CHAT_ID,
-    TMDB_ON_SEARCH, TMDB_POSTER, ULTRA_FAST_MODE, UPDATE_CHNL_LNK, URL
+    TMDB_ON_SEARCH, TMDB_POSTER, ULTRA_FAST_MODE, UPDATE_CHNL_LNK, URL,
+    TZ
 )
 from Script import script
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
@@ -24,23 +25,20 @@ import asyncio
 import re
 import math
 import random
-import pytz
 from datetime import datetime, timedelta
 lock = asyncio.Lock()
 
 logger = logging.getLogger(__name__)
 
+BUTTONS = LimitedDict(maxsize=200)
+FRESH = LimitedDict(maxsize=200)
 
-
-TIMEZONE = "Asia/Kolkata"
-BUTTON = {}
-BUTTONS = {}
-FRESH = {}
-BUTTONS0 = {}
-BUTTONS1 = {}
-BUTTONS2 = {}
-SPELL_CHECK = {}
-
+REMOVES_WORDS = {"in", "upload", "series", "full", "horror", "thriller", "mystery", "print", "file"}
+SEARCH_CLEAN_REGEX = re.compile(
+    r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|bro|bruh|broh|helo|that|find|dubbed|link|venum|iruka|pannunga|pannungga|anuppunga|anupunga|anuppungga|anupungga|film|undo|kitti|kitty|tharu|kittumo|kittum|movie|any(one)|with\ssubtitle(s)?)\b",
+    re.IGNORECASE
+)
+PREFIX_COMMAND_REGEX = re.compile(r"^[\/,!.\U0001F600-\U000E007F]")
 
 @Client.on_message(filters.group & filters.text & filters.incoming & ~filters.regex(r"^/") )
 async def give_filter(client, message):
@@ -48,11 +46,11 @@ async def give_filter(client, message):
         return
     if EMOJI_MODE:
         try:
-            await message.react(emoji=random.choice(REACTIONS), big=True)
+            asyncio.create_task(message.react(emoji=random.choice(REACTIONS), big=True))
         except Exception:
-            await message.react(emoji="⚡️")
+            asyncio.create_task(message.react(emoji="⚡️"))
             pass
-    await mdb.update_top_messages(message.from_user.id, message.text)
+    asyncio.create_task(mdb.update_top_messages(message.from_user.id, message.text))
     if message.chat.id != SUPPORT_CHAT_ID:
         settings = await get_settings(message.chat.id)
         try:
@@ -83,30 +81,30 @@ async def give_filter(client, message):
 
 
 @Client.on_message(filters.private & filters.text & filters.incoming & ~filters.regex(r"^/") & ~filters.regex(r"(https?://)?(t\.me|telegram\.me|telegram\.dog)/"))
-async def pm_text(bot, message):
+async def pm_text(client, message):
     bot_id = temp.ME
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
     if EMOJI_MODE:
         try:
-            await message.react(emoji=random.choice(REACTIONS), big=True)
+            asyncio.create_task(message.react(emoji=random.choice(REACTIONS), big=True))
         except Exception:
-            await message.react(emoji="⚡️")
+            asyncio.create_task(message.react(emoji="⚡️"))
             pass
     if content.startswith(("#")):
         return
     try:
-        await mdb.update_top_messages(user_id, content)
+        asyncio.create_task(mdb.update_top_messages(user_id, content))
         pm_search = await db.pm_search_status(bot_id)
         if pm_search:
-            await auto_filter(bot, message)
+            await auto_filter(client, message)
         else:
             await message.reply_text(
                 text=script.PM_SEARCH_DISABLED_TXT.format(user),
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📝 ʀᴇǫᴜᴇsᴛ ʜᴇʀᴇ ", url=GRP_LNK)]])
             )
-            await bot.send_message(
+            await client.send_message(
                 chat_id=LOG_CHANNEL,
                 text=script.PM_LOG_TXT.format(user, user_id, content)
             )
@@ -115,17 +113,17 @@ async def pm_text(bot, message):
 
 
 @Client.on_callback_query(filters.regex(r"^reffff"))
-async def refercall(bot, query):
+async def refercall(client, query):
     btn = [[
         InlineKeyboardButton(
-            'invite link', url=f'https://telegram.me/share/url?url=https://t.me/{bot.me.username}?start=reff_{query.from_user.id}&text=Hello%21%20Experience%20a%20bot%20that%20offers%20a%20vast%20library%20of%20unlimited%20movies%20and%20series.%20%F0%9F%98%83'),
+            'invite link', url=f'https://telegram.me/share/url?url=https://t.me/{client.me.username}?start=reff_{query.from_user.id}&text=Hello%21%20Experience%20a%20bot%20that%20offers%20a%20vast%20library%20of%20unlimited%20movies%20and%20series.%20%F0%9F%98%83'),
         InlineKeyboardButton(
             f'⏳ {referdb.get_refer_points(query.from_user.id)}', callback_data='ref_point'),
         InlineKeyboardButton('Back', callback_data='premium_info')
     ]]
     reply_markup = InlineKeyboardMarkup(btn)
     try:
-        await bot.edit_message_media(
+        await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
             InputMediaPhoto("https://graph.org/file/1a2e64aee3d4d10edd930.jpg")
@@ -133,22 +131,25 @@ async def refercall(bot, query):
     except Exception:    
         pass
     await query.message.edit_text(
-        text=script.REFER_TXT.format(bot.me.username, query.from_user.id),
+        text=script.REFER_TXT.format(client.me.username, query.from_user.id),
         reply_markup=reply_markup,
         parse_mode=enums.ParseMode.HTML
     )
     await query.answer()
 
 @Client.on_callback_query(filters.regex(r"^next"))
-async def next_page(bot, query):
+async def next_page(client, query):
     try:
         await query.answer()
     except Exception:
         pass
     ident, req, key, offset = query.data.split("_")
-    curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
-    if int(req) not in [query.from_user.id, 0]:
-        return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
+    curr_time = datetime.now(TZ).time()
+    try:
+        if int(req) not in [query.from_user.id, 0]:
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
+    except Exception:
+        pass
     try:
         offset = int(offset)
     except Exception:
@@ -169,7 +170,6 @@ async def next_page(bot, query):
     if not files:
         return
     temp.GETALL[key] = files
-    temp.SHORT[query.from_user.id] = query.message.chat.id
     settings = await get_settings(query.message.chat.id)
     if settings.get('button'):
         btn = [
@@ -315,7 +315,7 @@ async def next_page(bot, query):
                     ],
                 )
     if not settings["button"]:
-        cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+        cur_time = datetime.now(TZ).time()
         time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
             timedelta(hours=curr_time.hour, minutes=curr_time.minute, seconds=(
                 curr_time.second+(curr_time.microsecond/1000000)))
@@ -353,10 +353,13 @@ async def next_page(bot, query):
 
 
 @Client.on_callback_query(filters.regex(r"^spol"))
-async def advantage_spoll_choker(bot, query):
+async def advantage_spoll_choker(client, query):
     _, id, user = query.data.split('#')
-    if int(user) != 0 and query.from_user.id != int(user):
-        return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
+    try:
+        if int(user) not in [query.from_user.id, 0]:
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
+    except Exception:
+        pass
     movies = await get_posterx(id, id=True) if TMDB_ON_SEARCH else await get_poster(id, id=True)
     movie = movies.get('title')
     movie = re.sub(r"[:-]", " ", movie)
@@ -365,13 +368,13 @@ async def advantage_spoll_choker(bot, query):
     files, offset, total_results = await get_search_results(query.message.chat.id, movie, offset=0, filter=True)
     if files:
         k = (movie, files, offset, total_results)
-        await auto_filter(bot, query, k)
+        await auto_filter(client, query, k)
     else:
         reqstr1 = query.from_user.id if query.from_user else 0
-        reqstr = await bot.get_users(reqstr1)
+        reqstr = await client.get_users(reqstr1)
         if NO_RESULTS_MSG:
             try:
-                await bot.send_message(chat_id=BIN_CHANNEL, text=script.NORSLTS.format(reqstr.id, reqstr.mention, movie))
+                await client.send_message(chat_id=BIN_CHANNEL, text=script.NORSLTS.format(reqstr.id, reqstr.mention, movie))
             except Exception as e:
                 logger.error("Error In Spol: %s — Make Sure Bot Admin BIN CHANNEL", e)
         btn = InlineKeyboardMarkup(
@@ -386,11 +389,7 @@ async def qualities_cb_handler(client: Client, query: CallbackQuery):
     _, req, key = query.data.split("#")
     try:
         if int(req) not in [query.from_user.id, 0]:
-            return await query.answer(
-                f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\n"
-                f"ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...",
-                show_alert=True,
-            )
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
     except Exception:
         pass
 
@@ -422,7 +421,7 @@ async def qualities_cb_handler(client: Client, query: CallbackQuery):
 @Client.on_callback_query(filters.regex(r"^fq#"))
 async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
     _, qual, req, key = query.data.split("#")
-    curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+    curr_time = datetime.now(TZ).time()
     search = FRESH.get(key)
     search = search.replace("_", " ")
     baal = qual in search
@@ -434,7 +433,7 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
     message = query.message
     try:
         if int(req) not in [query.from_user.id, 0]:
-            return await query.answer(f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...", show_alert=True,)
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
     except Exception:
         pass
     if qual != "homepage":
@@ -519,7 +518,7 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
                 text="↭ ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ ↭", callback_data="pages")]
         )
     if not settings["button"]:
-        cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+        cur_time = datetime.now(TZ).time()
         time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
             timedelta(hours=curr_time.hour, minutes=curr_time.minute, seconds=(
                 curr_time.second+(curr_time.microsecond/1000000)))
@@ -545,11 +544,7 @@ async def languages_cb_handler(client: Client, query: CallbackQuery):
     _, req, key = query.data.split("#")
     try:
         if int(req) not in [query.from_user.id, 0]:
-            return await query.answer(
-                f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\n"
-                f"ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...",
-                show_alert=True,
-            )
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
     except Exception:
         pass
 
@@ -580,7 +575,7 @@ async def languages_cb_handler(client: Client, query: CallbackQuery):
 @Client.on_callback_query(filters.regex(r"^fl#"))
 async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
     _, lang, req, key = query.data.split("#")
-    curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+    curr_time = datetime.now(TZ).time()
     search = FRESH.get(key)
     search = search.replace("_", " ")
     baal = lang in search
@@ -592,7 +587,7 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
     message = query.message
     try:
         if int(req) not in [query.from_user.id, 0]:
-            return await query.answer(f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ...", show_alert=True,)
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
     except Exception:
         pass
     if lang != "homepage":
@@ -673,7 +668,7 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
         btn.append([InlineKeyboardButton(
             text="↭ ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ ↭", callback_data="pages")])
     if not settings["button"]:
-        cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+        cur_time = datetime.now(TZ).time()
         time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
             timedelta(hours=curr_time.hour, minutes=curr_time.minute, seconds=(
                 curr_time.second+(curr_time.microsecond/1000000)))
@@ -697,10 +692,7 @@ async def seasons_cb_handler(client: Client, query: CallbackQuery):
     _, req, key = query.data.split("#")
     try:
         if int(req) not in [query.from_user.id, 0]:
-            return await query.answer(
-                f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ…",
-                show_alert=True,
-            )
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
     except Exception:
         pass
     offset = 0
@@ -725,7 +717,7 @@ async def seasons_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^fs#"))
 async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
-    start_t = datetime.now(pytz.timezone("Asia/Kolkata"))
+    start_t = datetime.now(TZ)
     _, season_tag, req, key = query.data.split("#")
     search = FRESH.get(key).replace("_", " ")
     season_tag = season_tag.lower()
@@ -740,7 +732,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
     BUTTONS[key] = search_final
     try:
         if int(req) not in [query.from_user.id, 0]:
-            return await query.answer("⚠️ Not your request", show_alert=True)
+            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
     except Exception:
         pass
 
@@ -808,7 +800,7 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
                 "↭  ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ ↭", callback_data="pages")]
         )
     if not settings.get("button"):
-        time_difference = datetime.now(pytz.timezone("Asia/Kolkata")) - start_t
+        time_difference = datetime.now(TZ) - start_t
         remaining_seconds = f"{time_difference.total_seconds():.2f}"
         dreamx_title = clean_search_text(search_final)
         cap = await get_cap(settings, remaining_seconds, files, query, total_results, dreamx_title, offset=1)
@@ -852,13 +844,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "pages":
         await query.answer("ᴛʜɪs ɪs ᴘᴀɢᴇs ʙᴜᴛᴛᴏɴ 😅")
 
-
-
     if query.data.startswith("file"):
         ident, file_id = query.data.split("#")
         user = query.message.reply_to_message.from_user.id if query.message.reply_to_message else query.from_user.id
-        if int(user) != 0 and query.from_user.id != int(user):
-            return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
+        try:
+            if int(user) not in [query.from_user.id, 0]:
+                return await query.answer(script.ALRT_TXT.format(query.from_user.first_name), show_alert=True)
+        except Exception:
+            pass
         await query.answer(url=f"https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file_id}")
 
     elif query.data.startswith("sendfiles"):
@@ -1162,9 +1155,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await asyncio.sleep(DELETE_TIME)
         await dreamcinezone.delete()
 
-
-
-
     elif query.data == "start":
         buttons = [[
                     InlineKeyboardButton('🔰 ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ 🔰', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
@@ -1176,7 +1166,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                      InlineKeyboardButton('ᴜᴘɢʀᴀᴅᴇ 🎟', callback_data="premium_info"),
                 ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        current_time = datetime.now(pytz.timezone(TIMEZONE))
+        current_time = datetime.now(TZ)
         curr_time = current_time.hour
         if curr_time < 12:
             gtxt = "ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ 🌞"
@@ -1428,7 +1418,7 @@ async def auto_filter(client, msg, spoll=False):
     """
     Core auto_filter logic with timing/debug logging removed.
     """
-    curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+    curr_time = datetime.now(TZ).time()
 
     async def _schedule_delete(sent_obj, orig_msg, delay):
         try:
@@ -1450,22 +1440,14 @@ async def auto_filter(client, msg, spoll=False):
             message = msg
             if message.text.startswith("/"):
                 return
-            if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
+            if PREFIX_COMMAND_REGEX.match(message.text):
                 return
             if len(message.text) < 100:
                 message_text = message.text or ""
                 search = message_text.lower()
                 m = await message.reply_text(script.SEARCHING_TXT.format(search))
-                find = search.split(" ")
-                search = ""
-                removes = ["in", "upload", "series", "full",
-                           "horror", "thriller", "mystery", "print", "file"]
-                for x in find:
-                    if x in removes:
-                        continue
-                    else:
-                        search = search + x + " "
-                search = re.sub(r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|bro|bruh|broh|helo|that|find|dubbed|link|venum|iruka|pannunga|pannungga|anuppunga|anupunga|anuppungga|anupungga|film|undo|kitti|kitty|tharu|kittumo|kittum|movie|any(one)|with\ssubtitle(s)?)\b", "", search, flags=re.IGNORECASE)
+                search = " ".join([x for x in search.split() if x not in REMOVES_WORDS])
+                search = SEARCH_CLEAN_REGEX.sub("", search)
                 search = search.replace("-", " ")
                 search = re.sub(r"[:']", "", search)
                 search = re.sub(r"\s+", " ", search).strip()
@@ -1503,9 +1485,8 @@ async def auto_filter(client, msg, spoll=False):
         FRESH[key] = search
         temp.GETALL[key] = files
         req = message.from_user.id if message.from_user else 0
-        temp.SHORT[message.from_user.id] = message.chat.id
         try:
-            await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji="🍿")
+            asyncio.create_task(client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji="🍿"))
         except Exception:
             pass
         if settings.get('button'):
@@ -1587,13 +1568,12 @@ async def auto_filter(client, msg, spoll=False):
             imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_POSTER else await get_poster(search, file=(files[0]).file_name)
         else:
             imdb = None
-        cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+        cur_time = datetime.now(TZ).time()
         time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
             timedelta(hours=curr_time.hour, minutes=curr_time.minute,
                       seconds=(curr_time.second+(curr_time.microsecond/1000000)))
         remaining_seconds = "{:.2f}".format(time_difference.total_seconds())
         TEMPLATE = script.IMDB_TEMPLATE_TXT
-        settings = await get_settings(message.chat.id)
         if settings.get('template'):
             TEMPLATE = settings['template']
         if imdb:

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 @Client.on_message(filters.text & (filters.group | filters.private) & filters.incoming & ~filters.regex(r"^/") & ~filters.user(ADMINS) & ~filters.chat(SUPPORT_CHAT_ID), group=-5)
-async def maintenance_interceptor(bot: Client, message: Message):
+async def maintenance_interceptor(client: Client, message: Message):
     bot_id = temp.ME
     if await db.maintenance_status(bot_id):
         user_mention = message.from_user.mention if message.from_user else "User"
@@ -21,7 +21,7 @@ async def maintenance_interceptor(bot: Client, message: Message):
         raise StopPropagation
 
 @Client.on_callback_query(~filters.user(ADMINS) & ~filters.chat(SUPPORT_CHAT_ID), group=-5)
-async def maintenance_callback_interceptor(bot: Client, query: CallbackQuery):
+async def maintenance_callback_interceptor(client: Client, query: CallbackQuery):
     bot_id = temp.ME
     if await db.maintenance_status(bot_id):
         await query.answer(
@@ -31,7 +31,7 @@ async def maintenance_callback_interceptor(bot: Client, query: CallbackQuery):
         raise StopPropagation
 
 @Client.on_message(filters.command("maintenance") & filters.user(ADMINS))
-async def maintenance_cmd(bot: Client, message: Message):
+async def maintenance_cmd(client: Client, message: Message):
     bot_id = temp.ME
     is_maintenance = await db.maintenance_status(bot_id)
     
@@ -57,7 +57,7 @@ async def maintenance_cmd(bot: Client, message: Message):
     )
 
 @Client.on_callback_query(filters.regex(r"^maintenance_") & filters.user(ADMINS))
-async def maintenance_toggle_callback(bot: Client, query: CallbackQuery):
+async def maintenance_toggle_callback(client: Client, query: CallbackQuery):
     bot_id = temp.ME
     action = query.data.split("_")[1]
     
@@ -95,5 +95,5 @@ async def maintenance_toggle_callback(bot: Client, query: CallbackQuery):
         pass
 
 @Client.on_callback_query(filters.regex("none"))
-async def none_callback(bot, query):
+async def none_callback(client, query):
     await query.answer("Already in this state!", show_alert=False)

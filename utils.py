@@ -37,9 +37,20 @@ SMART_CLOSE = '”'
 START_CHAR = ('\'', '"', SMART_OPEN)
 
 
+class LimitedDict(dict):
+    def __init__(self, maxsize=200):
+        super().__init__()
+        self.maxsize = maxsize
+
+    def __setitem__(self, key, value):
+        if len(self) >= self.maxsize:
+            self.pop(next(iter(self)), None)
+        super().__setitem__(key, value)
+
+
 class temp(object):   
-    BANNED_USERS = []
-    BANNED_CHATS = []
+    BANNED_USERS = set()
+    BANNED_CHATS = set()
     ME = None
     CURRENT=int(os.environ.get("SKIP", 2))
     CANCEL = False
@@ -49,23 +60,22 @@ class temp(object):
     U_NAME = None
     B_NAME = None
     B_LINK = None
-    SETTINGS = {}
-    GETALL = {}
-    SHORT = {}
-    IMDB_CAP = {}
-    VERIFICATIONS = {}
-    TEMP_INVITE_LINKS = {}
-    REQ_LINKS = {}
+    SETTINGS = LimitedDict(maxsize=300)
+    GETALL = LimitedDict(maxsize=200)
+    IMDB_CAP = LimitedDict(maxsize=100)
+    VERIFICATIONS = LimitedDict(maxsize=300)
+    TEMP_INVITE_LINKS = LimitedDict(maxsize=200)
+    REQ_LINKS = LimitedDict(maxsize=200)
 
 
-async def is_req_subscribed(bot, user_id, rqfsub_channels):
+async def is_req_subscribed(client, user_id, rqfsub_channels):
     btn = []
 
     async def check_req_channel(ch_id):
         if await db.has_joined_channel(user_id, ch_id):
             return None
         try:
-            member = await bot.get_chat_member(ch_id, user_id)
+            member = await client.get_chat_member(ch_id, user_id)
             if member.status != enums.ChatMemberStatus.BANNED:
                 await db.add_join_req(user_id, ch_id)
                 return None
@@ -75,11 +85,11 @@ async def is_req_subscribed(bot, user_id, rqfsub_channels):
             logger.error(f"Error checking membership in {ch_id}: {e}")
 
         try:
-            chat = await bot.get_chat(ch_id)
+            chat = await client.get_chat(ch_id)
             if ch_id in temp.REQ_LINKS:
                 invite_link = temp.REQ_LINKS[ch_id]
             else:
-                invite = await bot.create_chat_invite_link(
+                invite = await client.create_chat_invite_link(
                     ch_id,
                     creates_join_request=True
                 )
@@ -102,17 +112,17 @@ async def is_req_subscribed(bot, user_id, rqfsub_channels):
 
     return btn
 
-async def is_subscribed(bot, user_id, fsub_channels):
+async def is_subscribed(client, user_id, fsub_channels):
     btn = []
     
     async def check_channel(channel_id):
         try:
             # No need to get chat object separately
-            await bot.get_chat_member(channel_id, user_id)
+            await client.get_chat_member(channel_id, user_id)
         except UserNotParticipant:
             try:
-                chat = await bot.get_chat(int(channel_id))
-                invite_link = await bot.create_chat_invite_link(channel_id)
+                chat = await client.get_chat(int(channel_id))
+                invite_link = await client.create_chat_invite_link(channel_id)
                 return InlineKeyboardButton(f"📢 Join {chat.title}", url=invite_link.invite_link)
             except Exception as e:
                 logger.warning(f"Failed to create invite for {channel_id}: {e}")
@@ -129,9 +139,9 @@ async def is_subscribed(bot, user_id, fsub_channels):
             
     return btn
 
-async def is_check_admin(bot, chat_id, user_id):
+async def is_check_admin(client, chat_id, user_id):
     try:
-        member = await bot.get_chat_member(chat_id, user_id)
+        member = await client.get_chat_member(chat_id, user_id)
         return member.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]
     except Exception:
         return False
@@ -1114,3 +1124,5 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
     except Exception as e:
         logger.error(f"Error in get_cap: {e}")
         pass
+
+
