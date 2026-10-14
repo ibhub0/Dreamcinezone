@@ -57,7 +57,7 @@ class Media(Document):
     cover = fields.StrField(allow_none=True)
 
     class Meta:
-        indexes = ("$file_name", "file_unique_id")
+        indexes = ("$file_name",)
         collection_name = COLLECTION_NAME
 
 
@@ -75,7 +75,7 @@ class Media2(Document):
 
 
     class Meta:
-        indexes = ("$file_name", "file_unique_id")
+        indexes = ("$file_name",)
         collection_name = COLLECTION_NAME
 
 
