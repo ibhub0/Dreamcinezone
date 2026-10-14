@@ -11,10 +11,7 @@ from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait,
 from pyrogram import enums
 from typing import Union
 from Script import script
-from typing import List
 from database.users_chats_db import db
-from bs4 import BeautifulSoup
-import aiohttp
 from shortzy import Shortzy
 from plugins.Dreamxfutures.Imdbposter import get_movie_detailsx
 
@@ -25,17 +22,19 @@ def get_random_mix_id():
     chars = string.ascii_letters + string.digits
     return ''.join(random.choices(chars, k=6))
 
-BTN_URL_REGEX = re.compile(
-    r"(\[([^\[]+?)\]\((buttonurl|buttonalert):(?:/{0,2})(.+?)(:same)?\))"
-)
+
+_CLEAN_FILENAME_PREFIXES = ('[', '@', 'www.')
+_UNWANTED_BAD_WORDS = {word.lower() for word in BAD_WORDS}
+_PHRASES_SPLIT_REGEX = re.compile(r'\s{2,}')
+_LANG_REGEX = re.compile(r'\b(hin(di)?|eng(lish)?|mal(ayalam)?|tam(il)?|tel(ugu)?|kan(nada)?|ben(gali)?|mar(athi)?|urdu|guj(arat)?|punj(abi)?)\b', re.IGNORECASE)
+_SEASON_REGEX = re.compile(r's(eason)?\s*0*\d+', re.IGNORECASE)
+_QUALITY_REGEX = re.compile(r'\b(360p|480p|720p|1080p|1440p|2160p|4k)\b', re.IGNORECASE)
+_MULTI_SPACE_REGEX = re.compile(r'\s+')
+_REQUEST_UNDERLINE_REGEX = re.compile(r"<u>(.*?)</u>")
+_REQUEST_PREFIX_REGEX = re.compile(r"📝 ʀᴇǫᴜᴇꜱᴛ ?: ?(.*?)(?:\n|$)")
+
 
 imdb = IMDBKit()
-
-BANNED = {}
-SMART_OPEN = '“'
-SMART_CLOSE = '”'
-START_CHAR = ('\'', '"', SMART_OPEN)
-
 
 class LimitedDict(dict):
     def __init__(self, maxsize=200):
@@ -223,21 +222,6 @@ async def clear_junk(user_id, message):
     except Exception:
         return False, "Error"
      
-async def get_status(bot_id):
-    try:
-        return await db.movie_update_status(bot_id) or False  
-    except Exception as e:
-        logger.error(f"Error in get_movie_update_status: {e}")
-        return False  
-
-async def add_name_to_db(filename):
-    """
-    Helper function to add a filename to the database.
-    """
-    
-    return await db.add_name(filename) 
-
-
 def listx_to_str(k):
     if k is None or k == "":
         return "N/A"
@@ -351,98 +335,6 @@ async def get_poster(query, bulk=False, id=False, file=None):
         "url": movie.url or f"https://www.imdb.com/title/{imdb_id}"
     }
     
-#Remove Nahi Kiya Hu.....Agar Tujha Remove Karna Hai To Kar Dena
-async def old_get_poster(query, bulk=False, id=False, file=None):
-    if not id:
-        query = (query.strip()).lower()
-        title = query
-        year = re.findall(r'[1-2]\d{3}$', query, re.IGNORECASE)
-        imdb
-        if year:
-            year = list_to_str(year[:1])
-            title = (query.replace(year, "")).strip()
-        elif file is not None:
-            year = re.findall(r'[1-2]\d{3}', file, re.IGNORECASE)
-            if year:
-                year = list_to_str(year[:1]) 
-        else:
-            year = None
-        movieid = imdb.search_movie(title.lower(), results=10)
-        if not movieid:
-            return None
-        if year:
-            filtered=list(filter(lambda k: str(k.get('year')) == str(year), movieid))
-            if not filtered:
-                filtered = movieid
-        else:
-            filtered = movieid
-        movieid=list(filter(lambda k: k.get('kind') in ['movie', 'tv series'], filtered))
-        if not movieid:
-            movieid = filtered
-        if bulk:
-            return movieid
-        movieid = movieid[0].movieID
-    else:
-        movieid = query
-    movie = imdb.get_movie(movieid)
-    imdb.update(movie, info=['main', 'vote details'])
-    if movie.get("original air date"):
-        date = movie["original air date"]
-    elif movie.get("year"):
-        date = movie.get("year")
-    else:
-        date = "N/A"
-    plot = ""
-    if not LONG_IMDB_DESCRIPTION:
-        plot = movie.get('plot')
-        if plot and len(plot) > 0:
-            plot = plot[0]
-    else:
-        plot = movie.get('plot outline')
-    if plot and len(plot) > 800:
-        plot = plot[0:800] + "..."
-    STANDARD_GENRES = {
-        'Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 'Documentary',
-        'Drama', 'Family', 'Fantasy', 'Film-Noir', 'History', 'Horror', 'Music',
-        'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sport', 'Thriller', 'War', 'Western'
-    }
-    raw_genres = movie.get("genres", "N/A")
-    if isinstance(raw_genres, str):
-        genre_list = [g.strip() for g in raw_genres.split(",")]
-        genres = ", ".join(g for g in genre_list if g in STANDARD_GENRES) or "N/A"
-    else:
-        genres = ", ".join(g for g in raw_genres if g in STANDARD_GENRES) or "N/A"
-        
-    return {
-        'title': movie.get('title'),
-        'votes': movie.get('votes'),
-        "aka": list_to_str(movie.get("akas")),
-        "seasons": movie.get("number of seasons"),
-        "box_office": movie.get('box office'),
-        'localized_title': movie.get('localized title'),
-        'kind': movie.get("kind"),
-        "imdb_id": f"tt{movie.get('imdbID')}",
-        "cast": list_to_str(movie.get("cast")),
-        "runtime": list_to_str(movie.get("runtimes")),
-        "countries": list_to_str(movie.get("countries")),
-        "certificates": list_to_str(movie.get("certificates")),
-        "languages": list_to_str(movie.get("languages")),
-        "director": list_to_str(movie.get("director")),
-        "writer":list_to_str(movie.get("writer")),
-        "producer":list_to_str(movie.get("producer")),
-        "composer":list_to_str(movie.get("composer")) ,
-        "cinematographer":list_to_str(movie.get("cinematographer")),
-        "music_team": list_to_str(movie.get("music department")),
-        "distributors": list_to_str(movie.get("distributors")),
-        'release_date': date,
-        'year': movie.get('year'),
-        'genres': genres,
-        'poster': movie.get('full-size cover url'),
-        'plot': plot,
-        'rating': str(movie.get("rating")),
-        'url':f'https://www.imdb.com/title/tt{movieid}'
-    }
-    
 async def get_posterx(query, bulk=False, id=False, file=None):
     """
     Fetches movie details from TMDB using the get_movie_detailsx helper
@@ -506,23 +398,6 @@ async def get_posterx(query, bulk=False, id=False, file=None):
         'url': details.get('tmdb_url')
     }
     
-async def search_gagala(text):
-    usr_agent = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-        'Chrome/61.0.3163.100 Safari/537.36'
-    }
-    text = text.replace(" ", "+")
-    url = f"https://www.google.com/search?q={text}"
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=usr_agent, timeout=30) as response:
-            response.raise_for_status()
-            html = await response.text()
-
-    soup = await asyncio.to_thread(BeautifulSoup, html, 'html.parser')
-    titles = soup.find_all('h3')
-    return [title.get_text() for title in titles if title.get_text().strip()]
-
 async def get_shortlink(link, grp_id, is_second_shortener=False, is_third_shortener=False):
     settings = await get_settings(grp_id)
     if is_third_shortener:             
@@ -565,14 +440,10 @@ async def delete_group_setting(group_id, key):
         await db.update_settings(group_id, current)
 
 def clean_filename(file_name):
-    prefixes = ('[', '@', 'www.')
-    unwanted = {word.lower() for word in BAD_WORDS}
-    
-    file_name = ' '.join(
+    return ' '.join(
         word for word in file_name.split()
-        if not (word.startswith(prefixes) or word.lower() in unwanted)
+        if not (word.startswith(_CLEAN_FILENAME_PREFIXES) or word.lower() in _UNWANTED_BAD_WORDS)
     )
-    return file_name
 
 def get_size(size):
     units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
@@ -583,15 +454,11 @@ def get_size(size):
         size /= 1024.0
     return "%.2f %s" % (size, units[i])
 
-def split_list(lst, n):
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]  
-
 def extract_request_content(message_text):
-    match = re.search(r"<u>(.*?)</u>", message_text)
+    match = _REQUEST_UNDERLINE_REGEX.search(message_text)
     if match:
         return match.group(1).strip()
-    match = re.search(r"📝 ʀᴇǫᴜᴇꜱᴛ ?: ?(.*?)(?:\n|$)", message_text)
+    match = _REQUEST_PREFIX_REGEX.search(message_text)
     if match:
         return match.group(1).strip()
     return message_text.strip()
@@ -736,170 +603,6 @@ def extract_user(message: Message) -> Union[int, str]:
         user_first_name = message.from_user.first_name
     return (user_id, user_first_name)
 
-def list_to_str(k):
-    if not k:
-        return "N/A"
-    elif len(k) == 1:
-        return str(k[0])
-    elif MAX_LIST_ELM:
-        k = k[:int(MAX_LIST_ELM)]
-        return ' '.join(f'{elem}, ' for elem in k)
-    else:
-        return ' '.join(f'{elem}, ' for elem in k)
-
-def last_online(from_user):
-    time = ""
-    if from_user.is_bot:
-        time += "🤖 Bot :("
-    elif from_user.status == enums.UserStatus.RECENTLY:
-        time += "Recently"
-    elif from_user.status == enums.UserStatus.LAST_WEEK:
-        time += "Within the last week"
-    elif from_user.status == enums.UserStatus.LAST_MONTH:
-        time += "Within the last month"
-    elif from_user.status == enums.UserStatus.LONG_AGO:
-        time += "A long time ago :("
-    elif from_user.status == enums.UserStatus.ONLINE:
-        time += "Currently Online"
-    elif from_user.status == enums.UserStatus.OFFLINE:
-        time += from_user.last_online_date.strftime("%a, %d %b %Y, %H:%M:%S")
-    return time
-
-
-def split_quotes(text: str) -> List:
-    if not any(text.startswith(char) for char in START_CHAR):
-        return text.split(None, 1)
-    counter = 1
-    while counter < len(text):
-        if text[counter] == "\\":
-            counter += 1
-        elif text[counter] == text[0] or (text[0] == SMART_OPEN and text[counter] == SMART_CLOSE):
-            break
-        counter += 1
-    else:
-        return text.split(None, 1)
-    key = remove_escapes(text[1:counter].strip())
-    rest = text[counter + 1:].strip()
-    if not key:
-        key = text[0] + text[0]
-    return list(filter(None, [key, rest]))
-
-def gfilterparser(text, keyword):
-    if "buttonalert" in text:
-        text = (text.replace("\n", "\\n").replace("\t", "\\t"))
-    buttons = []
-    note_data = ""
-    prev = 0
-    i = 0
-    alerts = []
-    for match in BTN_URL_REGEX.finditer(text):
-        n_escapes = 0
-        to_check = match.start(1) - 1
-        while to_check > 0 and text[to_check] == "\\":
-            n_escapes += 1
-            to_check -= 1
-        if n_escapes % 2 == 0:
-            note_data += text[prev:match.start(1)]
-            prev = match.end(1)
-            if match.group(3) == "buttonalert":
-                if bool(match.group(5)) and buttons:
-                    buttons[-1].append(InlineKeyboardButton(
-                        text=match.group(2),
-                        callback_data=f"gfilteralert:{i}:{keyword}"
-                    ))
-                else:
-                    buttons.append([InlineKeyboardButton(
-                        text=match.group(2),
-                        callback_data=f"gfilteralert:{i}:{keyword}"
-                    )])
-                i += 1
-                alerts.append(match.group(4))
-            elif bool(match.group(5)) and buttons:
-                buttons[-1].append(InlineKeyboardButton(
-                    text=match.group(2),
-                    url=match.group(4).replace(" ", "")
-                ))
-            else:
-                buttons.append([InlineKeyboardButton(
-                    text=match.group(2),
-                    url=match.group(4).replace(" ", "")
-                )])
-
-        else:
-            note_data += text[prev:to_check]
-            prev = match.start(1) - 1
-    else:
-        note_data += text[prev:]
-
-    try:
-        return note_data, buttons, alerts
-    except Exception:
-        return note_data, buttons, None
-
-def parser(text, keyword):
-    if "buttonalert" in text:
-        text = (text.replace("\n", "\\n").replace("\t", "\\t"))
-    buttons = []
-    note_data = ""
-    prev = 0
-    i = 0
-    alerts = []
-    for match in BTN_URL_REGEX.finditer(text):
-        n_escapes = 0
-        to_check = match.start(1) - 1
-        while to_check > 0 and text[to_check] == "\\":
-            n_escapes += 1
-            to_check -= 1
-        if n_escapes % 2 == 0:
-            note_data += text[prev:match.start(1)]
-            prev = match.end(1)
-            if match.group(3) == "buttonalert":
-                if bool(match.group(5)) and buttons:
-                    buttons[-1].append(InlineKeyboardButton(
-                        text=match.group(2),
-                        callback_data=f"alertmessage:{i}:{keyword}"
-                    ))
-                else:
-                    buttons.append([InlineKeyboardButton(
-                        text=match.group(2),
-                        callback_data=f"alertmessage:{i}:{keyword}"
-                    )])
-                i += 1
-                alerts.append(match.group(4))
-            elif bool(match.group(5)) and buttons:
-                buttons[-1].append(InlineKeyboardButton(
-                    text=match.group(2),
-                    url=match.group(4).replace(" ", "")
-                ))
-            else:
-                buttons.append([InlineKeyboardButton(
-                    text=match.group(2),
-                    url=match.group(4).replace(" ", "")
-                )])
-
-        else:
-            note_data += text[prev:to_check]
-            prev = match.start(1) - 1
-    else:
-        note_data += text[prev:]
-
-    try:
-        return note_data, buttons, alerts
-    except Exception:
-        return note_data, buttons, None
-
-def remove_escapes(text: str) -> str:
-    res = ""
-    is_escaped = False
-    for counter in range(len(text)):
-        if is_escaped:
-            res += text[counter]
-            is_escaped = False
-        elif text[counter] == "\\":
-            is_escaped = True
-        else:
-            res += text[counter]
-    return res
 
 async def log_error(client, error_message):
     try:
@@ -920,16 +623,6 @@ def get_time(seconds):
             result += f'{int(period_value)}{period_name}'
     return result
     
-def humanbytes(size):
-    if not size:
-        return ""
-    power = 2**10
-    n = 0
-    Dic_powerN = {0: ' ', 1: 'Ki', 2: 'Mi', 3: 'Gi', 4: 'Ti'}
-    while size > power:
-        size /= power
-        n += 1
-    return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
 
 def get_readable_time(seconds):
     periods = [('d', 86400), ('h', 3600), ('m', 60), ('s', 1)]
@@ -980,16 +673,13 @@ async def get_seconds(time_string):
 
 def clean_search_text(search_raw: str) -> str:
     search_lower = search_raw.lower()
-    phrases = re.split(r'\s{2,}', search_lower.strip())
-    lang_pattern = r'\b(hin(di)?|eng(lish)?|mal(ayalam)?|tam(il)?|tel(ugu)?|kan(nada)?|ben(gali)?|mar(athi)?|urdu|guj(arat)?|punj(abi)?)\b'
-    season_pattern = r's(eason)?\s*0*\d+'
-    quality_pattern = r'\b(360p|480p|720p|1080p|1440p|2160p|4k)\b'  
+    phrases = _PHRASES_SPLIT_REGEX.split(search_lower.strip())
     cleaned_phrases = []
     for phrase in phrases:
-        phrase = re.sub(season_pattern, '', phrase, flags=re.IGNORECASE)
-        phrase = re.sub(lang_pattern, '', phrase, flags=re.IGNORECASE)
-        phrase = re.sub(quality_pattern, '', phrase, flags=re.IGNORECASE)
-        phrase = re.sub(r'\s+', ' ', phrase).strip()
+        phrase = _SEASON_REGEX.sub('', phrase)
+        phrase = _LANG_REGEX.sub('', phrase)
+        phrase = _QUALITY_REGEX.sub('', phrase)
+        phrase = _MULTI_SPACE_REGEX.sub(' ', phrase).strip()
         if phrase:
             cleaned_phrases.append(phrase)
     unique_phrases = []
