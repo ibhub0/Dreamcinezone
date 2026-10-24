@@ -31,6 +31,13 @@ logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 logging.getLogger("pymongo").setLevel(logging.WARNING)
 
+try:
+    import uvloop
+    uvloop.install()
+    logger.info("uvloop installed as event-loop policy.")
+except ImportError:
+    pass
+
 botStartTime = time.time()
 
 def get_plugins_names(plugins_dir="plugins"):
